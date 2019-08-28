@@ -52,9 +52,9 @@ vk.updates.hear('/purr', async (context) => {
 });
 
 vk.updates.hear(/^\/uch/i, async (context) => {
-    console.log(context.attachments[0].largePhoto)
+   
     await context.send(
-        context.send('xDxDxD')
+        context.send(context.attachments[0].largePhoto)
     );
 });
 

@@ -24,11 +24,11 @@ vk.updates.hear('/start', async (context) => {
 		/cat - Фото котика
 		/time - Показать дату 
         /reverse - Reverse text
-        /uch - Скинуть рассписание на сегодня
-        /uch next - Скинуть рассписание на завтра
-        /uch img - Скинуть рассписание в виде картинки
-        /uch <день> - Скинуть рассписание определенного дня
-        /uch <день> <месяц> - Скинуть рассписание определенного дня и месяца
+        /ras - Скинуть рассписание на сегодня
+        /ras next - Скинуть рассписание на завтра
+        /ras img - Скинуть рассписание в виде картинки
+        /ras <день> - Скинуть рассписание определенного дня
+        /ras <день> <месяц> - Скинуть рассписание определенного дня и месяца
 	`);
 });
 
@@ -51,7 +51,7 @@ vk.updates.hear(/^\/reverse (.+)/i, async (context) => {
 });
 
 
-vk.updates.hear(/^\/uch/i, async (context) => {
+vk.updates.hear(/^\/ras/i, async (context) => {
     var com = context.text.split(" ");
     file = JSON.parse(fs.readFileSync('schedule.json', 'utf-8'))
     switch (com.length) {
@@ -95,7 +95,7 @@ sceneManager.addScene(new StepScene('upr', [
 
 
 
-        if (com.length <= 3 && com[0] == "/upr") {
+        if ( com[0] == "/upr") {
             switch (com.length) {
                 case 1:
                     month = new Date().getMonth();
@@ -127,9 +127,7 @@ sceneManager.addScene(new StepScene('upr', [
     },
 
     async (context) => {
-
-
-        
+       
         // console.log(day);
         // console.log(month)
         // console.log("\n")
@@ -142,7 +140,7 @@ sceneManager.addScene(new StepScene('upr', [
         }
         fs.writeFileSync('schedule.json', JSON.stringify(file, null, 2));
         file = JSON.parse(fs.readFileSync('schedule.json', 'utf-8'))
-        await context.send("Рассписание установлено");
+         context.send("Рассписание установлено");
         await context.scene.leave();
     }
 ]));

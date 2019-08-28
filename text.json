@@ -1,0 +1,21 @@
+{
+  "id": 99,
+  "conversationMessageId": 99,
+  "peerId": 503131193,
+  "peerType": "user",
+  "senderId": 503131193,
+  "senderType": "user",
+  "createdAt": 1566971126,
+  "text": "/kek",
+  "forwards": [],
+  "attachments": [],
+  "isOutbox": false,
+  "$match": [
+    "/kek"
+  ],
+  "type": "message",
+  "subTypes": [
+    "new_message"
+  ],
+  "state": {}
+}

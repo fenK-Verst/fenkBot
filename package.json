@@ -5,11 +5,14 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start":"node index.js"
+    "start": "node index.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@vk-io/scenes": "0.0.0-alpha.3",
+    "@vk-io/session": "0.0.0-alpha.1",
+    "fs": "0.0.1-security",
     "vk-io": "^4.0.0-rc.20"
   }
 }

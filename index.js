@@ -43,13 +43,72 @@ vk.updates.hear('/cat', async (context) => {
 vk.updates.hear(['/time', '/date'], async (context) => {
     await context.send(String(new Date()));
 });
+vk.updates.hear(/^\/para/i, async (context) => {
+    var dat = new Date();
+    //console.log (dat.getHours());
+    //console.log (dat.getMinutes());
+    
+    var com = context.text.split(" ");
+    file = JSON.parse(fs.readFileSync('schedule.json', 'utf-8'))
+    if (com.length > 1) {
+        var hour = Number(com[1]);
+        var min = Number(com[2]);
+    } else {
+        var hour = dat.getHours();
+        var min = dat.getMinutes();
+
+    }
+
+    if (hour >= 0 && hour < 8) {
+        context.send(file[dat.getMonth()][dat.getDate()])
+    } else if (hour >= 8 && hour <= 9) {
+        if (hour == 9 && min >= 30) {
+            context.send(file[dat.getMonth() + 1][dat.getDate()]["3"])
+        } else {
+            context.send(file[dat.getMonth() + 1][dat.getDate()]["2"])
+
+        }
+    } else if (hour >= 10 && hour <= 11) {
+        if ((hour == 11 && min >= 10)) {
+            context.send(file[dat.getMonth() + 1][dat.getDate()]["4"])
+        } else {
+            context.send(file[dat.getMonth() + 1][dat.getDate()]["3"])
+
+        }
+    } else if (hour >= 12 && hour <= 13) {
+        if (hour == 13 && min >= 10) {
+            context.send(file[dat.getMonth() + 1][dat.getDate()]["5"])
+        } else {
+            context.send(file[dat.getMonth() + 1][dat.getDate()]["4"])
+
+        }
+    } else if (hour >= 14 && hour <= 15) {
+        if (hour == 15 && min >= 10) {
+            context.send(file[dat.getMonth() + 1][dat.getDate()]["6"])
+        } else {
+            context.send(file[dat.getMonth() + 1][dat.getDate()]["5"])
+
+        }
+    } else if (hour >= 18) {
+        if (hour == 18 && min < 10) {
+            context.send(file[dat.getMonth() + 1][dat.getDate()]["6"])
+        } else {
+            context.send("Поздно уже для пар то")
+
+        }
+    }
+});
 
 vk.updates.hear(/^\/reverse (.+)/i, async (context) => {
     await context.send(
         context.$match[1].split('').reverse().join('')
     );
 });
-
+vk.updates.hear(/^\/para (.+)/i, async (context) => {
+    await context.send(
+        context.$match[1].split('').reverse().join('')
+    );
+});
 
 vk.updates.hear(/^\/ras/i, async (context) => {
     var com = context.text.split(" ");
@@ -95,7 +154,7 @@ sceneManager.addScene(new StepScene('upr', [
 
 
 
-        if ( com[0] == "/upr") {
+        if (com[0] == "/upr") {
             switch (com.length) {
                 case 1:
                     month = new Date().getMonth();
@@ -127,20 +186,20 @@ sceneManager.addScene(new StepScene('upr', [
     },
 
     async (context) => {
-       
+
         // console.log(day);
         // console.log(month)
         // console.log("\n")
         var iz = context.text.split(" ");
         for (var i = 1; i <= 6; i++) {
-            if (i<=iz.length){
-            file[month][day][i.toString()] = iz[i - 1]
-            }else
-                file[month][day][i.toString()] ="Null"
+            if (i <= iz.length) {
+                file[month][day][i.toString()] = iz[i - 1]
+            } else
+                file[month][day][i.toString()] = "Null"
         }
         fs.writeFileSync('schedule.json', JSON.stringify(file, null, 2));
         file = JSON.parse(fs.readFileSync('schedule.json', 'utf-8'))
-         context.send("Рассписание установлено");
+        context.send("Рассписание установлено");
         await context.scene.leave();
     }
 ]));

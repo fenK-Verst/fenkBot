@@ -47,7 +47,7 @@ vk.updates.hear(/^\/para/i, async (context) => {
     var dat = new Date();
     //console.log (dat.getHours());
     //console.log (dat.getMinutes());
-    
+
     var com = context.text.split(" ");
     file = JSON.parse(fs.readFileSync('schedule.json', 'utf-8'))
     if (com.length > 1) {
@@ -157,7 +157,7 @@ sceneManager.addScene(new StepScene('upr', [
         if (com[0] == "/upr") {
             switch (com.length) {
                 case 1:
-                    month = new Date().getMonth();
+                    month = new Date().getMonth()+1;
                     day = new Date().getDate();
                     break;
 
@@ -165,11 +165,11 @@ sceneManager.addScene(new StepScene('upr', [
                     var dat = new Date();
                     dat.setDate(dat.getDate() + 1)
 
-                    month = dat.getMonth();
+                    month = dat.getMonth()+1;
                     day = dat.getDate();
                 } else {
 
-                    month = new Date().getMonth();
+                    month = new Date().getMonth()+1;
                     day = com[1];
                 }
                     break;

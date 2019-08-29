@@ -115,18 +115,18 @@ vk.updates.hear(/^\/ras/i, async (context) => {
     file = JSON.parse(fs.readFileSync('schedule.json', 'utf-8'))
     switch (com.length) {
         case 1:
-            context.send(getRasp(file[new Date().getMonth()][new Date().getDate()]))
+            context.send(getRasp(file[new Date().getMonth()+1][new Date().getDate()]))
             break;
 
         case 2: if (com[1].toUpperCase() == "NEXT") {
             var dat = new Date();
             dat.setDate(dat.getDate() + 1)
-            context.send(getRasp(file[dat.getMonth()][dat.getDate()]))
+            context.send(getRasp(file[dat.getMonth()+1][dat.getDate()]))
         } else if (com[1].toUpperCase() == "IMG") {
             context.sendPhoto(rasp)
         }
         else
-            context.send(getRasp(file[new Date().getMonth()][com[1]])); break;
+            context.send(getRasp(file[new Date().getMonth()+1][com[1]])); break;
         case 3: context.send(getRasp(file[com[2]][com[1]])); break;
         default: context.send("Неверное количество параметров");
     }
@@ -174,7 +174,7 @@ sceneManager.addScene(new StepScene('upr', [
                 }
                     break;
                 case 3:
-                    month = com[2]
+                    month = com[2];
                     day = com[1];
                     break;
 

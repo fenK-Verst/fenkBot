@@ -10,8 +10,16 @@ min=00;
 
 
 
+function inInterval(value) {
+    if (value >= 1 && value <= 12) {
+        return true;
+    } else {
+        return false;
+    }
+}
+console.log(inInterval('ыв'))
 
-if (hour >0  &&  hour <8 ){
+/*if (hour >0  &&  hour <8 ){
   console.log(file[dat.getMonth()][dat.getDate()])
 }else if (hour >=8 && hour <=9){
     if (hour == 9 && min>=30){
@@ -48,4 +56,4 @@ if (hour >0  &&  hour <8 ){
         console.log("Поздно уже для пар то")
 
     }
-}
+}*/

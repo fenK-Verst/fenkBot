@@ -56,46 +56,65 @@ vk.updates.hear(/^\/para/i, async (context) => {
     } else {
         var hour = dat.getHours();
         var min = dat.getMinutes();
-
     }
+    var para;
 
     if (hour >= 0 && hour < 8) {
-        context.send("1:" +file[dat.getMonth()][dat.getDate()])
+       para=1;
     } else if (hour >= 8 && hour <= 9) {
-        if (hour == 9 && min >= 30) {
-            context.send("3:" +file[dat.getMonth() + 1][dat.getDate()]["3"])
+        if (hour == 9 && min >= 40) {
+           para=3;
         } else {
-            context.send("2:" +file[dat.getMonth() + 1][dat.getDate()]["2"])
+            para=2;
 
         }
     } else if (hour >= 10 && hour <= 11) {
-        if ((hour == 11 && min >= 10)) {
-            context.send("4:" +file[dat.getMonth() + 1][dat.getDate()]["4"])
+        if ((hour == 11 && min >= 40)) {
+           para=4;
         } else {
-            context.send("3:" +file[dat.getMonth() + 1][dat.getDate()]["3"])
+           para=3;
 
         }
     } else if (hour >= 12 && hour <= 13) {
-        if (hour == 13 && min >= 10) {
-            context.send("5:"+file[dat.getMonth() + 1][dat.getDate()]["5"])
+        if (hour == 13 && min >= 30) {
+           para=5;
         } else {
-            context.send("4:" +file[dat.getMonth() + 1][dat.getDate()]["4"])
+           para=4;
 
         }
     } else if (hour >= 14 && hour <= 15) {
-        if (hour == 15 && min >= 10) {
-            context.send("6:" +file[dat.getMonth() + 1][dat.getDate()]["6"])
+        if (hour >= 15 && min >= 10) {
+            para=6;
         } else {
-            context.send("5:" +file[dat.getMonth() + 1][dat.getDate()]["5"])
+            para=5;
 
         }
-    } else if (hour >= 18) {
-        if (hour == 18 && min < 10) {
-            context.send("6:" +file[dat.getMonth() + 1][dat.getDate()]["6"])
+    } else if (hour >= 16 && hour <= 18) {
+        if (hour >= 16 && min >= 50) {
+            para = "S";
         } else {
-            context.send("Поздно уже для пар то")
-
+            para = 6;
         }
+        }else if (hour >= 18){
+        if (hour <= 18 && min >= 20) {
+            para = "S";
+        } else {
+            para = "Poz";
+        }  
+        }
+           
+
+        
+    
+    
+    if (para=="Poz"){
+        context.send("Поздно для пар уже");
+    }else if (para == "S"){
+        context.send("Это последняя пара");
+    } else if (file[dat.getMonth() + 1][dat.getDate()][String(para)].toUpperCase() != "NULL" && file[dat.getMonth() + 1][dat.getDate()][String(para)].toUpperCase() !="Щ")
+    context.send(para + ":" + file[dat.getMonth() + 1][dat.getDate()][String(para)])
+    else{
+        context.send("Пары нет/рассписание не установлено")
     }
 });
 
@@ -112,6 +131,7 @@ vk.updates.hear(/^\/para (.+)/i, async (context) => {
 
 vk.updates.hear(/^\/ras/i, async (context) => {
     var com = context.text.split(" ");
+    
     file = JSON.parse(fs.readFileSync('schedule.json', 'utf-8'))
     switch (com.length) {
         case 1:
@@ -174,12 +194,21 @@ sceneManager.addScene(new StepScene('upr', [
                 }
                     break;
                 case 3:
-                    month = com[2];
                     day = com[1];
+                    month = com[2];
+                    
                     break;
 
             }
-            return context.send('Введите данные');
+           // context.send("day:"+day+"\n"+"month:"+month)
+         
+            if (inInterval(month, "m") && inInterval(day, "d")){
+                return context.send('Введите данные');
+            }
+            
+            else{
+                 context.scene.leave();
+            }
         }
 
         return context.scene.step.next();
@@ -191,6 +220,8 @@ sceneManager.addScene(new StepScene('upr', [
         // console.log(month)
         // console.log("\n")
         var iz = context.text.split(" ");
+        
+        if (inInterval(month, "m") && inInterval(day, "d")){
         for (var i = 1; i <= 6; i++) {
             if (i <= iz.length) {
                 file[month][day][i.toString()] = iz[i - 1]
@@ -201,6 +232,7 @@ sceneManager.addScene(new StepScene('upr', [
         file = JSON.parse(fs.readFileSync('schedule.json', 'utf-8'))
         context.send("Рассписание установлено");
         await context.scene.leave();
+    }
     }
 ]));
 
@@ -234,4 +266,11 @@ function getRasp(n) {
         return ("На этот день еще нет рассписания")
     return (str);
 
+}
+function inInterval(value,p) {
+    if ((value >= 1 && value <= 12 && p == "m") || (value >= 1 && value <= 30 && p == "d" ))  {
+        return true;
+    } else {
+        return false;
+    }
 }

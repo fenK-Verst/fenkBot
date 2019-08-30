@@ -225,7 +225,7 @@ function getRasp(n) {
     var str = ""
     for (key in n) {
 
-        if (n[key].toUpperCase() != "NULL") {
+        if (n[key].toUpperCase() != "NULL" && n[key] != "0") {
 
             str += key + ":" + n[key] + "\n"
         }

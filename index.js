@@ -34,14 +34,13 @@ vk.updates.hear('/start', async (context) => {
 
 vk.updates.hear('/cat', async (context) => {
     await Promise.all([
-        context.send('Wait for the uploads awesome 😻'),
-
         context.sendPhoto('https://loremflickr.com/1280/719/')
     ]);
 });
 
 vk.updates.hear(['/time', '/date'], async (context) => {
-    await context.send(String(new Date()));
+    var dat=new Date();
+    context.send(dat.getHours()+":"+dat.getMinutes()+":"+dat.getSeconds()+"\n"+dat.getDate()+"."+(dat.getMonth()+1)+"."+dat.getFullYear());
 });
 vk.updates.hear(/^\/para/i, async (context) => {
     var dat = new Date();

@@ -1,16 +1,16 @@
-//"06f5e9828503a3d5b72a08a3d556d799eafebd8c505c08fe048d366a582aef205e89ccc9159e0fe58a91d"
+//""
 //id 185873386
 var fs = require("fs");
 const { VK } = require('vk-io');
 
 const vk = new VK({
-    token: "06f5e9828503a3d5b72a08a3d556d799eafebd8c505c08fe048d366a582aef205e89ccc9159e0fe58a91d"
+    token: ""
 });
 var rasp = "https://sun9-3.userapi.com/c846122/v846122093/d6776/NqM_20zkAbM.jpg"
 
 
 var TelegramBot = require('node-telegram-bot-api'); // Устанавливаем токен, который выдавал нам бот
-var token = '917044014:AAEWZIEZOgjGmYnXjscYRMYFda259a88Tx8'; // Включить опрос сервера. Бот должен обращаться к серверу Telegram, чтобы получать актуальную информацию 
+var token = ''; // Включить опрос сервера. Бот должен обращаться к серверу Telegram, чтобы получать актуальную информацию 
 var bot = new TelegramBot(token, { polling: true });
 
 

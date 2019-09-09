@@ -1,17 +1,17 @@
-//""
+//"06f5e9828503a3d5b72a08a3d556d799eafebd8c505c08fe048d366a582aef205e89ccc9159e0fe58a91d"
 //id 185873386
 var fs = require("fs");
 const { VK } = require('vk-io');
 
 const vk = new VK({
-    token: ""
+    token: "06f5e9828503a3d5b72a08a3d556d799eafebd8c505c08fe048d366a582aef205e89ccc9159e0fe58a91d"
 });
 var rasp = "https://sun9-3.userapi.com/c846122/v846122093/d6776/NqM_20zkAbM.jpg"
 
 
-var TelegramBot = require('node-telegram-bot-api'); // Устанавливаем токен, который выдавал нам бот
-var token = ''; // Включить опрос сервера. Бот должен обращаться к серверу Telegram, чтобы получать актуальную информацию 
-var bot = new TelegramBot(token, { polling: true });
+// var TelegramBot = require('node-telegram-bot-api'); // Устанавливаем токен, который выдавал нам бот
+// var token = '917044014:AAEWZIEZOgjGmYnXjscYRMYFda259a88Tx8'; // Включить опрос сервера. Бот должен обращаться к серверу Telegram, чтобы получать актуальную информацию 
+// var bot = new TelegramBot(token, { polling: true });
 
 
 
@@ -36,6 +36,7 @@ vk.updates.hear('/start', async (context) => {
         /ras img - Скинуть рассписание в виде картинки
         /ras <день> - Скинуть рассписание определенного дня
         /ras <день> <месяц> - Скинуть рассписание определенного дня и месяца
+        /para - Скинуть следующую пару
 	`);
 });
 
@@ -64,7 +65,7 @@ vk.updates.hear(/^\/para/i, async (context) => {
         var min = dat.getMinutes();
     }
     var para;
-    bot.sendMessage("518054807", "hour:" + hour + "\n" + "min:" + min);
+    //bot.sendMessage("518054807", "hour:" + hour + "\n" + "min:" + min);
 
 
     if (hour >= 0 && hour < 8) {
@@ -112,7 +113,7 @@ vk.updates.hear(/^\/para/i, async (context) => {
     }
 
 
-    bot.sendMessage("518054807", para);
+    // bot.sendMessage("518054807", para);
 
 
     if (para == "Poz") {
@@ -131,11 +132,6 @@ vk.updates.hear(/^\/reverse (.+)/i, async (context) => {
         context.$match[1].split('').reverse().join('')
     );
 });
-/*vk.updates.hear(/^\/para (.+)/i, async (context) => {
-    await context.send(
-        context.$match[1].split('').reverse().join('')
-    );
-});*/
 
 vk.updates.hear(/^\/ras/i, async (context) => {
     var com = context.text.split(" ");
@@ -143,21 +139,39 @@ vk.updates.hear(/^\/ras/i, async (context) => {
     file = JSON.parse(fs.readFileSync('schedule.json', 'utf-8'))
     switch (com.length) {
         case 1:
-            context.send(getRasp(file[new Date().getMonth() + 1][new Date().getDate()]))
+            context.send(getRasp(file[new Date().getMonth() + 1][new Date().getDate()], new Date().getMonth() + 1, new Date().getDate()))
             break;
 
         case 2: if (com[1].toUpperCase() == "NEXT") {
             var dat = new Date();
             dat.setDate(dat.getDate() + 1)
-            context.send(getRasp(file[dat.getMonth() + 1][dat.getDate()]))
+            context.send(getRasp(file[dat.getMonth() + 1][dat.getDate()], dat.getMonth() + 1, dat.getDate()))
         } else if (com[1].toUpperCase() == "IMG") {
             context.sendPhoto(rasp)
         }
         else
-            context.send(getRasp(file[new Date().getMonth() + 1][com[1]])); break;
-        case 3: context.send(getRasp(file[com[2]][com[1]])); break;
+            context.send(getRasp(file[new Date().getMonth() + 1][com[1]], new Date().getMonth() + 1, com[1])); break;
+        case 3: context.send(getRasp(file[com[2]][com[1]], com[2], com[1])); break;
         default: context.send("Неверное количество параметров");
     }
+
+});
+
+vk.updates.hear(/^\/about/i, async (context) => {
+
+   
+    context.send("Bot for schedule 17-VT-1 by @id161830362 (fenK) ")
+    
+});
+vk.updates.hear(/^\/imp/i, async (context) => {
+    var oFile = fs.readFileSync('oFile.txt', 'utf-8');
+    context.send(oFile);
+
+});
+vk.updates.hear(/^\/simp/i, async (context) => {
+    
+    
+    await context.scene.enter('OVS');
 
 });
 
@@ -243,7 +257,33 @@ sceneManager.addScene(new StepScene('upr', [
         }
     }
 ]));
+sceneManager.addScene(new StepScene('OVS', [
+    (context) => {
+        var com = context.text.split(" ");
 
+
+
+        if (com[0] == "/simp") {
+            return context.send('Введите данные');
+        }
+        return context.scene.step.next();
+    },
+
+    async (context) => {
+
+        var con = context.text.split(" ");
+        var str = "";
+        for (var i = 0; i < con.length; i++) {
+            str += con[i] + " ";
+        }
+
+            fs.writeFileSync('oFile.txt', str);
+            
+            context.send("Сообщение установлено");
+            await context.scene.leave();
+        }
+    
+]));
 
 
 vk.updates.on('message', sessionManager.middleware);
@@ -261,8 +301,8 @@ vk.updates.start().catch(console.error);
 
 
 
-function getRasp(n) {
-    var str = ""
+function getRasp(n,month,day) {
+    var str = "Рассписание на "+day+"."+month+"\n"
     for (key in n) {
 
         if (n[key].toUpperCase() != "NULL" && n[key].toUpperCase() != "Щ") {
@@ -270,7 +310,7 @@ function getRasp(n) {
             str += key + ":" + n[key] + "\n"
         }
     }
-    if (str == "")
+    if (str == ("Рассписание на " + day + " " + month + "\n"))
         return ("На этот день еще нет рассписания")
     return (str);
 

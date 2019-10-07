@@ -134,8 +134,11 @@ vk.updates.hear(/^\/reverse (.+)/i, async (context) => {
 });
 
 vk.updates.hear(/^\/ras/i, async (context) => {
+    if (context.senderId == 262742265){
+        return
+    }
     var com = context.text.split(" ");
-
+    fs.appendFileSync("f.txt", JSON.stringify(context));
     file = JSON.parse(fs.readFileSync('schedule.json', 'utf-8'))
     switch (com.length) {
         case 1:
@@ -159,9 +162,9 @@ vk.updates.hear(/^\/ras/i, async (context) => {
 
 vk.updates.hear(/^\/about/i, async (context) => {
 
-   
+
     context.send("Bot for schedule 17-VT-1 by @id161830362 (fenK) ")
-    
+
 });
 vk.updates.hear(/^\/imp/i, async (context) => {
     var oFile = fs.readFileSync('oFile.txt', 'utf-8');
@@ -169,8 +172,8 @@ vk.updates.hear(/^\/imp/i, async (context) => {
 
 });
 vk.updates.hear(/^\/simp/i, async (context) => {
-    
-    
+
+
     await context.scene.enter('OVS');
 
 });
@@ -277,12 +280,12 @@ sceneManager.addScene(new StepScene('OVS', [
             str += con[i] + " ";
         }
 
-            fs.writeFileSync('oFile.txt', str);
-            
-            context.send("Сообщение установлено");
-            await context.scene.leave();
-        }
-    
+        fs.writeFileSync('oFile.txt', str);
+
+        context.send("Сообщение установлено");
+        await context.scene.leave();
+    }
+
 ]));
 
 
@@ -291,7 +294,12 @@ vk.updates.on('message', sceneManager.middleware);
 vk.updates.on('message', sceneManager.middlewareIntercept);
 
 vk.updates.hear(/^\/upr/i, async (context) => {
-    await context.scene.enter('upr');
+    if (context.senderId == 161830362 || context.senderId == 259251175 || context.senderId == 503131193){
+        await context.scene.enter('upr');
+    }else{
+        context.send("Тоби суда нельзя")
+    }
+   
 });
 
 
@@ -301,18 +309,19 @@ vk.updates.start().catch(console.error);
 
 
 
-function getRasp(n,month,day) {
-    var str = "Рассписание на "+day+"."+month+"\n"
+function getRasp(n, month, day) {
+    var str = "Рассписание на " + day + "." + month + "\n";
+    var ss = "";
     for (key in n) {
 
         if (n[key].toUpperCase() != "NULL" && n[key].toUpperCase() != "Щ") {
 
-            str += key + ":" + n[key] + "\n"
+            ss += key + ":" + n[key] + "\n"
         }
     }
-    if (str == ("Рассписание на " + day + " " + month + "\n"))
+    if (ss == "")
         return ("На этот день еще нет рассписания")
-    return (str);
+    return (str + ss);
 
 }
 function inInterval(value, p) {

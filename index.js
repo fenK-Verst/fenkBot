@@ -135,10 +135,19 @@ vk.updates.hear(/^\/reverse (.+)/i, async (context) => {
 });
 
 vk.updates.hear(/^\/ras/i, async (context) => {
+<<<<<<< HEAD
    
     var com = context.text.split(" ");
     let date = new Date();
     date.setHours(0, 0, 0, 0);
+=======
+    if (context.senderId == 262742265){
+        return
+    }
+    var com = context.text.split(" ");
+    fs.appendFileSync("f.txt", JSON.stringify(context));
+    file = JSON.parse(fs.readFileSync('schedule.json', 'utf-8'))
+>>>>>>> 99de882588b7b22afa8fd6c4b522d1ff712d75e5
     switch (com.length) {
         case 1:
             getRasp(date).then((value) => {
@@ -189,6 +198,11 @@ vk.updates.hear(/^\/imp/i, async (context) => {
 
 });
 vk.updates.hear(/^\/simp/i, async (context) => {
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 99de882588b7b22afa8fd6c4b522d1ff712d75e5
     await context.scene.enter('OVS');
 
 });
@@ -335,12 +349,21 @@ vk.updates.on('message', sceneManager.middleware);
 vk.updates.on('message', sceneManager.middlewareIntercept);
 
 vk.updates.hear(/^\/upr/i, async (context) => {
+<<<<<<< HEAD
     if (context.senderId == 161830362 || context.senderId == 259251175 || context.senderId == 503131193) {
         await context.scene.enter('upr');
     } else {
         context.send("Тоби суда нельзя")
     }
 
+=======
+    if (context.senderId == 161830362 || context.senderId == 259251175 || context.senderId == 503131193){
+        await context.scene.enter('upr');
+    }else{
+        context.send("Тоби суда нельзя")
+    }
+   
+>>>>>>> 99de882588b7b22afa8fd6c4b522d1ff712d75e5
 });
 
 
@@ -350,6 +373,7 @@ vk.updates.start().catch(console.error);
 
 
 
+<<<<<<< HEAD
 function getRasp(date) {
     return new Promise((resolve, reject) => {
         db.all('SELECT l1,l2,l3,l4,l5,l6,date FROM LESSONS WHERE DATE=?', date, function (err, rows) {
@@ -364,12 +388,19 @@ function getRasp(date) {
                 if (rows[0]["l" + i] != "Null")
                     temp += (i + ":" + rows[0]["l" + i] + "\n")
             }
+=======
+function getRasp(n, month, day) {
+    var str = "Рассписание на " + day + "." + month + "\n";
+    var ss = "";
+    for (key in n) {
+>>>>>>> 99de882588b7b22afa8fd6c4b522d1ff712d75e5
 
             if (temp == "") {
                 if (date.getDay() == 0)
                     resolve("Воскресенье, нет пар")
                 resolve("На этот день еще нет рассписания");
 
+<<<<<<< HEAD
             }
 
 
@@ -392,6 +423,14 @@ function getRasp(date) {
          return ("На этот день еще нет рассписания")
      //return (str + ss);*/
     return (date.toString())
+=======
+            ss += key + ":" + n[key] + "\n"
+        }
+    }
+    if (ss == "")
+        return ("На этот день еще нет рассписания")
+    return (str + ss);
+>>>>>>> 99de882588b7b22afa8fd6c4b522d1ff712d75e5
 
 }
 function inInterval(value, p) {

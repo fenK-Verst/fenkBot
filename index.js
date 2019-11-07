@@ -398,6 +398,6 @@ function inInterval(value, p) {
     if ((value >= 1 && value <= 12 && p == "m") || (value >= 1 && value <= 31 && p == "d")) {
         return true;
     } else {
-        return false;s
+        return false;
     }
 }

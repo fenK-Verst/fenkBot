@@ -76,8 +76,8 @@ a[0] = {
     "5": "Null",
     "6": "Null"
 }
-let d1 = new Date(1575655200000);
-let d2 = new Date(1573063200000);
+let d1 = new Date(1575568800000);
+let d2 = new Date(1573063200000 );
 console.log(d1);
 console.log(d2)
 /*db.run('DELETE FROM Lessons', [], (err, rows) => {

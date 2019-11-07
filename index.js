@@ -55,9 +55,9 @@ vk.updates.hear(/^\/para/i, async (context) => {
     var dat = new Date();
     //console.log (dat.getHours());
     //console.log (dat.getMinutes());
-
+    
     var com = context.text.split(" ");
-    file = JSON.parse(fs.readFileSync('schedule.json', 'utf-8'))
+    //file = JSON.parse(fs.readFileSync('schedule.json', 'utf-8'))
     if (com.length > 1) {
         var hour = Number(com[1]);
         var min = Number(com[2]);
@@ -116,15 +116,25 @@ vk.updates.hear(/^\/para/i, async (context) => {
 
     // bot.sendMessage("518054807", para);
 
-
+    dat.setHours(0, 0, 0, 0);
     if (para == "Poz") {
         context.send("Поздно для пар уже");
     } else if (para == "S") {
         context.send("Это последняя пара");
-    } else if (file[dat.getMonth() + 1][dat.getDate()][String(para)].toUpperCase() != "NULL" && file[dat.getMonth() + 1][dat.getDate()][String(para)].toUpperCase() != "Щ") {
-        context.send(para + ":" + file[dat.getMonth() + 1][dat.getDate()][String(para)])
     } else {
-        context.send("Пары нет/рассписание не установлено")
+        db.all('SELECT l'+para+' FROM LESSONS WHERE DATE=?', dat, function (err, rows) {
+            if (err){
+                context.send(err.message)
+            }else{
+                
+                if (rows[0]["l" + para] !="Null"){
+                    context.send(para+":"+rows[0]["l" + para])
+                }else{
+                    context.send("Пара не установлена")
+                }
+               
+            }
+        })
     }
 });
 
@@ -207,7 +217,7 @@ vk.updates.hear(/^\/kek/i, async (context) => {
 });
 
 var day, month;
-file = JSON.parse(fs.readFileSync('schedule.json', 'utf-8'))
+//file = JSON.parse(fs.readFileSync('schedule.json', 'utf-8'))
 sceneManager.addScene(new StepScene('upr', [
     (context) => {
         var com = context.text.split(" ");
@@ -273,7 +283,7 @@ sceneManager.addScene(new StepScene('upr', [
 
             let date = new Date();
             date.setHours(0, 0, 0, 0);
-            date.setFullYear(date.getFullYear(), month, day - 1)
+            date.setFullYear(date.getFullYear(), month-1, day)
 
 
             db.run(`UPDATE LESSONS SET l1=?,l2=?,l3=?,l4=?,l5=?,l6=? WHERE date=? `, temp[0], temp[1], temp[2], temp[3], temp[4], temp[5], date, function (err) {
@@ -285,7 +295,7 @@ sceneManager.addScene(new StepScene('upr', [
                 if (err) {
                     console.log(err.message)
                 }
-                console.table(rows)
+                // console.table(rows)
             });
             /* for (var i = 1; i <= 6; i++) {
                  temp[i]=[];
@@ -352,31 +362,46 @@ vk.updates.start().catch(console.error);
 
 function getRasp(date) {
     return new Promise((resolve, reject) => {
-        db.all('SELECT l1,l2,l3,l4,l5,l6,date FROM LESSONS WHERE DATE=?', date, function (err, rows) {
-            if (err) {
-                //console.log(err.message)
+       
+        if (isNaN(date.getTime())){
+            
+            resolve("Что-то пошло не так");
+        }else{
+            if (date.getFullYear() !=new Date().getFullYear()){
+                console.log(123)
+                resolve('Неверный год O_o');
+                return;
             }
-            console.table(rows)
-            //console.table(rows);
-            //console.dir(rows[0].lessons)
-            let temp = '';
-            for (var i = 1; i <= 6; i++) {
-                if (rows[0]["l" + i] != "Null")
-                    temp += (i + ":" + rows[0]["l" + i] + "\n")
-            }
+            db.all('SELECT l1,l2,l3,l4,l5,l6,date FROM LESSONS WHERE DATE=?', date, function (err, rows) {
+                if (err) {
+                    console.log(err.message);
+                    resolve(err.message)
+                }
+                // console.table(rows)
+                //console.table(rows);
+                //console.dir(rows[0].lessons)
+                let temp = '';
 
-            if (temp == "") {
-                if (date.getDay() == 0)
-                    resolve("Воскресенье, нет пар")
-                resolve("На этот день еще нет рассписания");
+                for (var i = 1; i <= 6; i++) {
+                    if (rows[0]["l" + i] != "Null")
+                        temp += (i + ":" + rows[0]["l" + i] + "\n")
+                }
 
-            }
+                if (temp == "") {
+                    if (date.getDay() == 0)
+                        resolve("Воскресенье, нет пар")
+                    resolve("На этот день еще нет рассписания");
+
+                }
 
 
-            let time = "Рассписание на " + date.toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZoneName: 'short' }).replace(/,.GMT\+6/, "") + "\n";
-            resolve(time + temp)
+                let time = "Рассписание на " + date.toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZoneName: 'short' }).replace(/,.GMT\+6/, "") + "\n";
+                resolve(time + temp)
+            });
+        }
+           
+        
         });
-    });
 
     //return str;
     /* var str = "Рассписание на " + day + "." + month + "\n";

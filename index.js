@@ -7,7 +7,8 @@ const vk = new VK({
     token: "06f5e9828503a3d5b72a08a3d556d799eafebd8c505c08fe048d366a582aef205e89ccc9159e0fe58a91d"
 });
 var rasp = "https://sun9-3.userapi.com/c846122/v846122093/d6776/NqM_20zkAbM.jpg"
-
+const sqlite3 = require('sqlite3').verbose();
+var db = new sqlite3.Database('schedule.db');
 
 // var TelegramBot = require('node-telegram-bot-api'); // Устанавливаем токен, который выдавал нам бот
 // var token = '917044014:AAEWZIEZOgjGmYnXjscYRMYFda259a88Tx8'; // Включить опрос сервера. Бот должен обращаться к серверу Telegram, чтобы получать актуальную информацию 
@@ -23,8 +24,8 @@ const sceneManager = new SceneManager();
 /* fs.writeFileSync('users.json', JSON.stringify(file, null, 2));
 file = JSON.parse(fs.readFileSync('users.json', 'utf-8')) */
 
-file = JSON.parse(fs.readFileSync('schedule.json', 'utf-8'))
-console.log()
+//file = JSON.parse(fs.readFileSync('schedule.json', 'utf-8'))
+console.log("Bot was started")
 vk.updates.hear('/start', async (context) => {
     await context.send(`
 		My commands list
@@ -134,24 +135,43 @@ vk.updates.hear(/^\/reverse (.+)/i, async (context) => {
 });
 
 vk.updates.hear(/^\/ras/i, async (context) => {
+   
     var com = context.text.split(" ");
-
-    file = JSON.parse(fs.readFileSync('schedule.json', 'utf-8'))
+    let date = new Date();
+    date.setHours(0, 0, 0, 0);
     switch (com.length) {
         case 1:
-            context.send(getRasp(file[new Date().getMonth() + 1][new Date().getDate()], new Date().getMonth() + 1, new Date().getDate()))
+            getRasp(date).then((value) => {
+                context.send(value)
+            })
+
             break;
 
         case 2: if (com[1].toUpperCase() == "NEXT") {
-            var dat = new Date();
-            dat.setDate(dat.getDate() + 1)
-            context.send(getRasp(file[dat.getMonth() + 1][dat.getDate()], dat.getMonth() + 1, dat.getDate()))
+
+            date.setDate(date.getDate() + 1);
+            getRasp(date).then((value) => {
+                context.send(value)
+            })
         } else if (com[1].toUpperCase() == "IMG") {
             context.sendPhoto(rasp)
         }
-        else
-            context.send(getRasp(file[new Date().getMonth() + 1][com[1]], new Date().getMonth() + 1, com[1])); break;
-        case 3: context.send(getRasp(file[com[2]][com[1]], com[2], com[1])); break;
+        else {
+
+            date.setFullYear(new Date().getFullYear(), new Date().getMonth(), com[1])
+
+            getRasp(date).then((value) => {
+                context.send(value)
+            })
+        }
+            break;
+        case 3: {
+            date.setFullYear(new Date().getFullYear(), com[2], com[1])
+            getRasp(date).then((value) => {
+                context.send(value)
+            })
+            break;
+        }
         default: context.send("Неверное количество параметров");
     }
 
@@ -159,9 +179,9 @@ vk.updates.hear(/^\/ras/i, async (context) => {
 
 vk.updates.hear(/^\/about/i, async (context) => {
 
-   
+
     context.send("Bot for schedule 17-VT-1 by @id161830362 (fenK) ")
-    
+
 });
 vk.updates.hear(/^\/imp/i, async (context) => {
     var oFile = fs.readFileSync('oFile.txt', 'utf-8');
@@ -169,8 +189,6 @@ vk.updates.hear(/^\/imp/i, async (context) => {
 
 });
 vk.updates.hear(/^\/simp/i, async (context) => {
-    
-    
     await context.scene.enter('OVS');
 
 });
@@ -237,21 +255,47 @@ sceneManager.addScene(new StepScene('upr', [
     },
 
     async (context) => {
-
-        // console.log(day);
-        // console.log(month)
-        // console.log("\n")
-        var iz = context.text.split(" ");
-
         if (inInterval(month, "m") && inInterval(day, "d")) {
-            for (var i = 1; i <= 6; i++) {
-                if (i <= iz.length) {
-                    file[month][day][i.toString()] = iz[i - 1]
-                } else
-                    file[month][day][i.toString()] = "Null"
+            var temp = context.text.split(" ");
+            temp = temp.map(function (val) {
+                if (val.toUpperCase() == 'Щ') {
+                    return "Null"
+                } else {
+                    return val;
+                }
+            })
+            for (var i=0;i<6;i++){
+                if(!temp[i]){
+                    temp[i]="Null"
+                }
             }
-            fs.writeFileSync('schedule.json', JSON.stringify(file, null, 2));
-            file = JSON.parse(fs.readFileSync('schedule.json', 'utf-8'))
+
+
+            let date = new Date();
+            date.setHours(0, 0, 0, 0);
+            date.setFullYear(date.getFullYear(), month, day-1)
+            
+            
+            db.run(`UPDATE LESSONS SET l1=?,l2=?,l3=?,l4=?,l5=?,l6=? WHERE date=? `, temp[0], temp[1], temp[2], temp[3], temp[4], temp[5], date, function (err) {
+                if (err) {
+                    console.log(err.message);
+                }
+            });
+            db.all('SELECT l1,l2,l3,l4,l5,l6,date FROM LESSONS WHERE DATE=?', date, function (err, rows) {
+                if (err) {
+                    console.log(err.message)
+                }
+                console.table(rows)
+            });
+            /* for (var i = 1; i <= 6; i++) {
+                 temp[i]=[];
+                 if (i <= iz.length) {
+                     temp[month][day][i.toString()] = iz[i - 1]
+                 } else
+                     file[month][day][i.toString()] = "Null"
+             }*/
+            //fs.writeFileSync('schedule.json', JSON.stringify(file, null, 2));
+            //file = JSON.parse(fs.readFileSync('schedule.json', 'utf-8'))
             context.send("Рассписание установлено");
             await context.scene.leave();
         }
@@ -277,12 +321,12 @@ sceneManager.addScene(new StepScene('OVS', [
             str += con[i] + " ";
         }
 
-            fs.writeFileSync('oFile.txt', str);
-            
-            context.send("Сообщение установлено");
-            await context.scene.leave();
-        }
-    
+        fs.writeFileSync('oFile.txt', str);
+
+        context.send("Сообщение установлено");
+        await context.scene.leave();
+    }
+
 ]));
 
 
@@ -291,7 +335,12 @@ vk.updates.on('message', sceneManager.middleware);
 vk.updates.on('message', sceneManager.middlewareIntercept);
 
 vk.updates.hear(/^\/upr/i, async (context) => {
-    await context.scene.enter('upr');
+    if (context.senderId == 161830362 || context.senderId == 259251175 || context.senderId == 503131193) {
+        await context.scene.enter('upr');
+    } else {
+        context.send("Тоби суда нельзя")
+    }
+
 });
 
 
@@ -301,18 +350,48 @@ vk.updates.start().catch(console.error);
 
 
 
-function getRasp(n,month,day) {
-    var str = "Рассписание на "+day+"."+month+"\n"
-    for (key in n) {
+function getRasp(date) {
+    return new Promise((resolve, reject) => {
+        db.all('SELECT l1,l2,l3,l4,l5,l6,date FROM LESSONS WHERE DATE=?', date, function (err, rows) {
+            if (err) {
+                //console.log(err.message)
+            }
+            console.table(rows)
+            //console.table(rows);
+            //console.dir(rows[0].lessons)
+            let temp = '';
+            for (var i = 1; i <= 6; i++) {
+                if (rows[0]["l" + i] != "Null")
+                    temp += (i + ":" + rows[0]["l" + i] + "\n")
+            }
 
-        if (n[key].toUpperCase() != "NULL" && n[key].toUpperCase() != "Щ") {
+            if (temp == "") {
+                if (date.getDay() == 0)
+                    resolve("Воскресенье, нет пар")
+                resolve("На этот день еще нет рассписания");
 
-            str += key + ":" + n[key] + "\n"
-        }
-    }
-    if (str == ("Рассписание на " + day + " " + month + "\n"))
-        return ("На этот день еще нет рассписания")
-    return (str);
+            }
+
+
+            let time = "Рассписание на " + date.toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZoneName: 'short' }).replace(/,.GMT\+6/, "") + "\n";
+            resolve(time + temp)
+        });
+    });
+
+    //return str;
+    /* var str = "Рассписание на " + day + "." + month + "\n";
+     var ss = "";
+     for (key in n) {
+ 
+         if (n[key].toUpperCase() != "NULL" && n[key].toUpperCase() != "Щ") {
+ 
+             ss += key + ":" + n[key] + "\n"
+         }
+     }
+     if (ss == "")
+         return ("На этот день еще нет рассписания")
+     //return (str + ss);*/
+    return (date.toString())
 
 }
 function inInterval(value, p) {

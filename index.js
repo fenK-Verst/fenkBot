@@ -1,23 +1,23 @@
 //"06f5e9828503a3d5b72a08a3d556d799eafebd8c505c08fe048d366a582aef205e89ccc9159e0fe58a91d"
 //id 185873386
-var fs = require("fs");
-const { VK } = require('vk-io');
+const fs = require("fs");
+const {VK} = require('vk-io');
 
 const vk = new VK({
     token: "06f5e9828503a3d5b72a08a3d556d799eafebd8c505c08fe048d366a582aef205e89ccc9159e0fe58a91d"
 });
-var rasp = "https://sun9-3.userapi.com/c846122/v846122093/d6776/NqM_20zkAbM.jpg"
+const {api} = vk;
+let rasp = "https://sun9-3.userapi.com/c846122/v846122093/d6776/NqM_20zkAbM.jpg";
 const sqlite3 = require('sqlite3').verbose();
-var db = new sqlite3.Database('schedule.db');
+let db = new sqlite3.Database('schedule.db');
 
 // var TelegramBot = require('node-telegram-bot-api'); // Устанавливаем токен, который выдавал нам бот
 // var token = '917044014:AAEWZIEZOgjGmYnXjscYRMYFda259a88Tx8'; // Включить опрос сервера. Бот должен обращаться к серверу Telegram, чтобы получать актуальную информацию 
 // var bot = new TelegramBot(token, { polling: true });
 
 
-
-const { SessionManager } = require('@vk-io/session');
-const { SceneManager, StepScene } = require('@vk-io/scenes');
+const {SessionManager} = require('@vk-io/session');
+const {SceneManager, StepScene} = require('@vk-io/scenes');
 const sessionManager = new SessionManager();
 const sceneManager = new SceneManager();
 
@@ -25,7 +25,7 @@ const sceneManager = new SceneManager();
 file = JSON.parse(fs.readFileSync('users.json', 'utf-8')) */
 
 //file = JSON.parse(fs.readFileSync('schedule.json', 'utf-8'))
-console.log("Bot was started")
+console.log("Bot was started");
 vk.updates.hear('/start', async (context) => {
     await context.send(`
 		My commands list
@@ -41,6 +41,19 @@ vk.updates.hear('/start', async (context) => {
 	`);
 });
 
+vk.updates.hear('/mem', async (context) => {
+    let ret;
+
+    api.wall.get({
+        domain: "q_qvazar"
+    }).then(value => {
+        console.dir(value)
+    }).catch(e => {
+        throw e;
+    });
+    await context.send('mem');
+});
+
 vk.updates.hear('/cat', async (context) => {
     await Promise.all([
         context.sendPhoto('https://loremflickr.com/1280/719/')
@@ -52,22 +65,19 @@ vk.updates.hear(['/time', '/date'], async (context) => {
     context.send(dat.getHours() + ":" + dat.getMinutes() + ":" + dat.getSeconds() + "\n" + dat.getDate() + "." + (dat.getMonth() + 1) + "." + dat.getFullYear());
 });
 vk.updates.hear(/^\/para/i, async (context) => {
-    var dat = new Date();
-    //console.log (dat.getHours());
-    //console.log (dat.getMinutes());
-    
-    var com = context.text.split(" ");
-    //file = JSON.parse(fs.readFileSync('schedule.json', 'utf-8'))
-    if (com.length > 1) {
-        var hour = Number(com[1]);
-        var min = Number(com[2]);
-    } else {
-        var hour = dat.getHours();
-        var min = dat.getMinutes();
-    }
-    var para;
-    //bot.sendMessage("518054807", "hour:" + hour + "\n" + "min:" + min);
+    let dat = new Date(),
+        hour,
+        min,
+        para,
+        com = context.text.split(" ");
 
+    if (com.length > 1) {
+        hour = Number(com[1]);
+        min = Number(com[2]);
+    } else {
+        hour = dat.getHours();
+        min = dat.getMinutes();
+    }
 
     if (hour >= 0 && hour < 8) {
         para = 1;
@@ -113,26 +123,23 @@ vk.updates.hear(/^\/para/i, async (context) => {
         }
     }
 
-
-    // bot.sendMessage("518054807", para);
-
     dat.setHours(0, 0, 0, 0);
     if (para == "Poz") {
         context.send("Поздно для пар уже");
     } else if (para == "S") {
         context.send("Это последняя пара");
     } else {
-        db.all('SELECT l'+para+' FROM LESSONS WHERE DATE=?', dat, function (err, rows) {
-            if (err){
+        db.all('SELECT l' + para + ' FROM LESSONS WHERE DATE=?', dat, function (err, rows) {
+            if (err) {
                 context.send(err.message)
-            }else{
-                
-                if (rows[0]["l" + para] !="Null"){
-                    context.send(para+":"+rows[0]["l" + para])
-                }else{
+            } else {
+
+                if (rows[0]["l" + para] || rows[0]["l" + para] != "Null") {
+                    context.send(para + ":" + rows[0]["l" + para])
+                } else {
                     context.send("Пара не установлена")
                 }
-               
+
             }
         })
     }
@@ -142,47 +149,55 @@ vk.updates.hear(/^\/reverse (.+)/i, async (context) => {
     await context.send(
         context.$match[1].split('').reverse().join('')
     );
+
 });
 
 vk.updates.hear(/^\/ras/i, async (context) => {
 
-    var com = context.text.split(" ");
+    let com = context.text.split(" ");
     let date = new Date();
     date.setHours(0, 0, 0, 0);
     switch (com.length) {
         case 1:
             getRasp(date).then((value) => {
                 context.send(value)
-            })
+            });
 
             break;
 
-        case 2: if (com[1].toUpperCase() == "NEXT") {
+        case 2:
+            if (com[1].toUpperCase() == "NEXT") {
 
-            date.setDate(date.getDate() + 1);
-            getRasp(date).then((value) => {
-                context.send(value)
-            })
-        } else if (com[1].toUpperCase() == "IMG") {
-            context.sendPhoto(rasp)
-        }
-        else {
+                date.setDate(date.getDate() + 1);
 
-            date.setFullYear(new Date().getFullYear(), new Date().getMonth(), com[1])
+                getRasp(date).then((value) => {
+                    context.send(value);
+                });
+            } else if (com[1].toUpperCase() == "IMG") {
+                context.sendPhoto(rasp)
+            } else {
+                let newDate = com[1].split("."),
+                    day = newDate[0],
+                    month = newDate[1] - 1 || new Date().getMonth(),
+                    year = newDate[2] || new Date().getFullYear();
 
-            getRasp(date).then((value) => {
-                context.send(value)
-            })
-        }
+
+                date = new Date(year, month, day);
+                date.setHours(0, 0, 0, 0);
+                getRasp(date).then((value) => {
+                    context.send(value)
+                });
+            }
             break;
         case 3: {
-            date.setFullYear(new Date().getFullYear(), com[2], com[1])
+            date.setFullYear(new Date().getFullYear(), com[2] - 1, com[1]);
             getRasp(date).then((value) => {
-                context.send(value)
-            })
+                context.send(value);
+            });
             break;
         }
-        default: context.send("Неверное количество параметров");
+        default:
+            await context.send("Неверное количество параметров");
     }
 
 });
@@ -194,7 +209,7 @@ vk.updates.hear(/^\/about/i, async (context) => {
 
 });
 vk.updates.hear(/^\/imp/i, async (context) => {
-    var oFile = fs.readFileSync('oFile.txt', 'utf-8');
+    let oFile = fs.readFileSync('oFile.txt', 'utf-8');
     context.send(oFile);
 
 });
@@ -207,7 +222,7 @@ vk.updates.hear(/^\/kek/i, async (context) => {
 
     if (context.attachments.length == 0) {
         if (context.senderType == "user")
-            context.send('\/' + "kek Фото")
+            context.send('\/' + "kek Фото");
 
     } else {
         rasp = context.attachments[0].largePhoto;
@@ -215,48 +230,54 @@ vk.updates.hear(/^\/kek/i, async (context) => {
         context.send("Фото установено")
     }
 });
-
-var day, month;
+let day, month, year;
 //file = JSON.parse(fs.readFileSync('schedule.json', 'utf-8'))
 sceneManager.addScene(new StepScene('upr', [
     (context) => {
-        var com = context.text.split(" ");
-
-
+        let com = context.text.split(" ");
 
         if (com[0] == "/upr") {
             switch (com.length) {
                 case 1:
                     month = new Date().getMonth() + 1;
                     day = new Date().getDate();
+                    year = new Date().getFullYear();
                     break;
 
-                case 2: if (com[1].toUpperCase() == "NEXT") {
-                    var dat = new Date();
-                    dat.setDate(dat.getDate() + 1)
+                case 2:
+                    if (com[1].toUpperCase() == "NEXT") {
+                        let dat = new Date();
+                        dat.setDate(dat.getDate() + 1);
+                        month = dat.getMonth() + 1;
+                        day = dat.getDate();
+                        year = dat.getFullYear();
 
-                    month = dat.getMonth() + 1;
-                    day = dat.getDate();
-                } else {
-
-                    month = new Date().getMonth() + 1;
-                    day = com[1];
-                }
+                    } else {
+                        let newDate = com[1].split(".");
+                        day = +newDate[0];
+                        month = +newDate[1] || Number(new Date().getMonth()) + 1;
+                        year = +newDate[2] || new Date().getFullYear();
+                    }
                     break;
                 case 3:
-                    day = com[1];
-                    month = com[2];
-
+                    day = +com[1];
+                    month = +com[2];
+                    year = new Date().getFullYear();
                     break;
-
+                case 4:
+                    day = +com[1];
+                    month = +com[2];
+                    year = +com[3];
+                    break;
             }
-            //context.send("day:"+day+"\n"+"month:"+month)
+            month = Number(month);
+            day = Number(day);
+            year = Number(year);
+            context.send("day:" + day + "\n" + "month:" + month + "\n" + "year:" + year);
 
             if (inInterval(month, "m") && inInterval(day, "d")) {
                 return context.send('Введите данные');
-            }
-
-            else {
+            } else {
                 context.scene.leave();
             }
         }
@@ -266,37 +287,47 @@ sceneManager.addScene(new StepScene('upr', [
 
     async (context) => {
         if (inInterval(month, "m") && inInterval(day, "d")) {
-            var temp = context.text.split(" ");
+            let temp = context.text.split(" ");
+
             temp = temp.map(function (val) {
-                if (val.toUpperCase() == 'Щ') {
-                    return "Null"
+                if (!val || val.toUpperCase() == 'Щ') {
+                    return null
                 } else {
                     return val;
                 }
-            })
-            for (var i = 0; i < 6; i++) {
+            });
+            for (let i = 0; i < 6; i++) {
                 if (!temp[i]) {
-                    temp[i] = "Null"
+                    temp[i] = null
                 }
             }
 
 
             let date = new Date();
+            date.setFullYear(year, month - 1, day);
+
             date.setHours(0, 0, 0, 0);
-            date.setFullYear(date.getFullYear(), month-1, day)
 
-
-            db.run(`UPDATE LESSONS SET l1=?,l2=?,l3=?,l4=?,l5=?,l6=? WHERE date=? `, temp[0], temp[1], temp[2], temp[3], temp[4], temp[5], date, function (err) {
+            db.all('SELECT * FROM LESSONS WHERE DATE=?', date, function (err, rows) {
                 if (err) {
                     console.log(err.message);
+                    return;
                 }
-            });
-            db.all('SELECT l1,l2,l3,l4,l5,l6,date FROM LESSONS WHERE DATE=?', date, function (err, rows) {
-                if (err) {
-                    console.log(err.message)
+                let sql;
+                if (rows.length > 0) {
+                    sql = `UPDATE LESSONS SET l1=?,l2=?,l3=?,l4=?,l5=?,l6=? WHERE date=?`;
+                } else {
+                    sql = `INSERT INTO LESSONS(l1,l2,l3,l4,l5,l6,date) VALUES (?,?,?,?,?,?,?)`;
                 }
-                // console.table(rows)
+                db.run(sql, temp[0], temp[1], temp[2], temp[3], temp[4], temp[5], date, function (err) {
+                    if (err) {
+                        console.log(err.message);
+                    }
+                });
+
             });
+
+
             /* for (var i = 1; i <= 6; i++) {
                  temp[i]=[];
                  if (i <= iz.length) {
@@ -313,9 +344,7 @@ sceneManager.addScene(new StepScene('upr', [
 ]));
 sceneManager.addScene(new StepScene('OVS', [
     (context) => {
-        var com = context.text.split(" ");
-
-
+        let com = context.text.split(" ");
 
         if (com[0] == "/simp") {
             return context.send('Введите данные');
@@ -325,9 +354,10 @@ sceneManager.addScene(new StepScene('OVS', [
 
     async (context) => {
 
-        var con = context.text.split(" ");
-        var str = "";
-        for (var i = 0; i < con.length; i++) {
+        let con = context.text.split(" "),
+            str = "";
+
+        for (let i = 0; i < con.length; i++) {
             str += con[i] + " ";
         }
 
@@ -348,81 +378,61 @@ vk.updates.hear(/^\/upr/i, async (context) => {
     if (context.senderId == 161830362 || context.senderId == 259251175 || context.senderId == 503131193) {
         await context.scene.enter('upr');
     } else {
-        context.send("Тоби суда нельзя")
+        await context.send("Тоби суда нельзя");
     }
 
 });
 
 
-
-
 vk.updates.start().catch(console.error);
-
 
 
 function getRasp(date) {
     return new Promise((resolve, reject) => {
-       
-        if (isNaN(date.getTime())){
-            
+        if (isNaN(date.getTime())) {
             resolve("Что-то пошло не так");
-        }else{
-            if (date.getFullYear() !=new Date().getFullYear()){
-                console.log(123)
-                resolve('Неверный год O_o');
-                return;
+        } else {
+
+            if (date.getDay() == 0) {
+                resolve("Воскресенье, нет пар");
+                return
             }
-            db.all('SELECT l1,l2,l3,l4,l5,l6,date FROM LESSONS WHERE DATE=?', date, function (err, rows) {
+
+            db.all('SELECT l1,l2,l3,l4,l5,l6, date FROM LESSONS WHERE DATE=?', date, function (err, rows) {
                 if (err) {
                     console.log(err.message);
-                    resolve(err.message)
+                    reject(err.message)
                 }
-                // console.table(rows)
-                //console.table(rows);
-                //console.dir(rows[0].lessons)
-                let temp = '';
 
-                for (var i = 1; i <= 6; i++) {
-                    if (rows[0]["l" + i] != "Null")
-                        temp += (i + ":" + rows[0]["l" + i] + "\n")
+                let temp = '';
+                if (rows.length > 0) {
+                    for (let i = 1; i <= 6; i++) {
+                        if (rows[0]["l" + i] && rows[0]["l" + i] != "Null")
+                            temp += (i + ":" + rows[0]["l" + i] + "\n");
+                    }
                 }
 
                 if (temp == "") {
-                    if (date.getDay() == 0)
-                        resolve("Воскресенье, нет пар")
                     resolve("На этот день еще нет рассписания");
-
                 }
 
 
-                let time = "Рассписание на " + date.toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZoneName: 'short' }).replace(/,.GMT\+6/, "") + "\n";
-                resolve(time + temp)
+                let time = "Рассписание на " + date.toLocaleString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    timeZoneName: 'short'
+                }).replace(/,.GMT\+6/, "") + "\n";
+                resolve(time + temp);
             });
         }
-           
-        
-        });
 
-    //return str;
-    /* var str = "Рассписание на " + day + "." + month + "\n";
-     var ss = "";
-     for (key in n) {
- 
-         if (n[key].toUpperCase() != "NULL" && n[key].toUpperCase() != "Щ") {
- 
-             ss += key + ":" + n[key] + "\n"
-         }
-     }
-     if (ss == "")
-         return ("На этот день еще нет рассписания")
-     //return (str + ss);*/
-    return (date.toString())
+
+    });
 
 }
+
 function inInterval(value, p) {
-    if ((value >= 1 && value <= 12 && p == "m") || (value >= 1 && value <= 31 && p == "d")) {
-        return true;
-    } else {
-        return false;
-    }
+    return (value >= 1 && value <= 12 && p == "m") || (value >= 1 && value <= 31 && p == "d");
 }

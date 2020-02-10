@@ -375,14 +375,111 @@ vk.updates.on('message', sceneManager.middleware);
 vk.updates.on('message', sceneManager.middlewareIntercept);
 
 vk.updates.hear(/^\/upr/i, async (context) => {
-    if (context.senderId == 161830362 || context.senderId == 259251175 || context.senderId == 503131193) {
+    if ([161830362, 259251175, 503131193].includes(context.senderId)) {
         await context.scene.enter('upr');
     } else {
         await context.send("Тоби суда нельзя");
     }
 
 });
+vk.updates.hear("/ex", async (context) => {
+    const fetch = require('node-fetch');
 
+    let link = context.attachments[0].url;
+    // link = new URL(link);
+
+    fetch(link)
+        .then(res => {
+
+                res.buffer().then(b =>{
+                    fs.open(`rasp.xlsx`, 'w', function(err, fd) {
+                        if (err) {
+                            throw 'could not open file: ' + err;
+                        }
+
+                        // write the contents of the buffer, from position 0 to the end, to the file descriptor returned in opening our file
+                        fs.write(fd, b, 0, b.length, null, function(err) {
+                            if (err) throw 'error writing file: ' + err;
+                            fs.close(fd, function() {
+                                let exceltojson = require("xlsx-to-json-lc");
+                                exceltojson({
+                                    input: "rasp.xlsx",
+                                    output: "123.json",
+                                    lowerCaseHeaders: true //to convert all excel headers to lowr case in json
+                                }, async (err, result) => {
+                                    if (err) {
+                                        console.error(err);
+                                    } else {
+                                        // console.log(result);
+
+                                        let n = [];
+                                        result.forEach((value, index) => {
+                                            let date = value.date,
+                                                day = value.day,
+                                                l1 = value["1"] || null,
+                                                l12 = value["11"] || null,
+                                                l2 = value["2"] || null,
+                                                l21 = value["21"] || null,
+                                                l3 = value["3"] || null,
+                                                l4 = value["4"] || null,
+                                                l5 = value["5"] || null,
+                                                l6 = value["6"] || null;
+
+                                            l12 = l12 ? " : " + l12 : '';
+                                            l21 = l21 ? " : " + l21 : '';
+
+                                            l1 = l1 ? l1 + l12 : null ;
+                                            l2 = l2 ? l2 + l21 : null;
+
+                                            n.push({
+                                                l1: l1,
+                                                l2: l2,
+                                                l3: l3,
+                                                l4: l4,
+                                                l5: l5,
+                                                l6: l6,
+                                                date: date
+                                            });
+                                        });
+                                        db.run("DELETE FROM LESSONS");
+                                        n.forEach((value, index) => {
+                                            // console.log(index);
+                                            let l1 = value.l1,
+                                                l2 = value.l2,
+                                                l3 = value.l3,
+                                                l4 = value.l4,
+                                                l5 = value.l5,
+                                                l6 = value.l6,
+                                                date = value.date;
+                                            if (date) {
+                                                date = date.split("/");
+
+                                                date = new Date(2000+(+date[2]), date[0] - 1, date[1]);
+
+                                                date.setHours(0, 0, 0, 0);
+                                                db.run(`INSERT INTO LESSONS(date,l1,l2,l3,l4,l5,l6)VALUES (?,?,?,?,?,?,?)` ,[date,l1,l2,l3,l4,l5,l6] ,function (err) {
+                                                    if (err) {
+                                                        return console.log(err.message);
+                                                    }
+                                                    console.log(`A row has been inserted with rowid ${this.lastID}`);
+                                                });
+                                            }
+                                        });
+                                        await context.send("done");
+
+                                    }
+                                });
+
+                            });
+                        });
+                    });
+                });
+
+        })
+        .catch(async (e) => {
+            await context.send(e);
+        })
+});
 
 vk.updates.start().catch(console.error);
 

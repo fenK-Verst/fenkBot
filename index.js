@@ -134,7 +134,7 @@ vk.updates.hear(/^\/para/i, async (context) => {
                 context.send(err.message)
             } else {
 
-                if (rows[0]["l" + para] || rows[0]["l" + para] != "Null") {
+                if (rows[0]["l" + para]) {
                     context.send(para + ":" + rows[0]["l" + para])
                 } else {
                     context.send("Пара не установлена")
@@ -203,8 +203,6 @@ vk.updates.hear(/^\/ras/i, async (context) => {
 });
 
 vk.updates.hear(/^\/about/i, async (context) => {
-
-
     context.send("Bot for schedule 17-VT-1 by @id161830362 (fenK) ")
 
 });
@@ -327,17 +325,92 @@ sceneManager.addScene(new StepScene('upr', [
 
             });
 
-
-            /* for (var i = 1; i <= 6; i++) {
-                 temp[i]=[];
-                 if (i <= iz.length) {
-                     temp[month][day][i.toString()] = iz[i - 1]
-                 } else
-                     file[month][day][i.toString()] = "Null"
-             }*/
-            //fs.writeFileSync('schedule.json', JSON.stringify(file, null, 2));
-            //file = JSON.parse(fs.readFileSync('schedule.json', 'utf-8'))
             context.send("Рассписание установлено");
+            await context.scene.leave();
+        }
+    }
+]));
+sceneManager.addScene(new StepScene('dz', [
+    (context) => {
+        let com = context.text.split(" ");
+
+        if (com[0] == "/dz") {
+            switch (com.length) {
+                case 1:
+                    month = new Date().getMonth() + 1;
+                    day = new Date().getDate();
+                    year = new Date().getFullYear();
+                    break;
+
+                case 2:
+                    if (com[1].toUpperCase() == "NEXT") {
+                        let dat = new Date();
+                        dat.setDate(dat.getDate() + 1);
+                        month = dat.getMonth() + 1;
+                        day = dat.getDate();
+                        year = dat.getFullYear();
+
+                    } else {
+                        let newDate = com[1].split(".");
+                        day = +newDate[0];
+                        month = +newDate[1] || Number(new Date().getMonth()) + 1;
+                        year = +newDate[2] || new Date().getFullYear();
+                    }
+                    break;
+                case 3:
+                    day = +com[1];
+                    month = +com[2];
+                    year = new Date().getFullYear();
+                    break;
+                case 4:
+                    day = +com[1];
+                    month = +com[2];
+                    year = +com[3];
+                    break;
+            }
+            month = Number(month);
+            day = Number(day);
+            year = Number(year);
+            context.send("day:" + day + "\n" + "month:" + month + "\n" + "year:" + year);
+
+            if (inInterval(month, "m") && inInterval(day, "d")) {
+                return context.send('Введите данные');
+            } else {
+                context.scene.leave();
+            }
+        }
+
+        return context.scene.step.next();
+    },
+
+    async (context) => {
+        if (inInterval(month, "m") && inInterval(day, "d")) {
+            let dz = context.text;
+
+            let date = new Date();
+            date.setFullYear(year, month - 1, day);
+
+            date.setHours(0, 0, 0, 0);
+
+            db.all('SELECT * FROM LESSONS WHERE DATE=?', date, function (err, rows) {
+                if (err) {
+                    console.log(err.message);
+                    return;
+                }
+                let sql;
+                if (rows.length > 0) {
+                    sql = `UPDATE LESSONS SET dz=? WHERE date=?`;
+                } else {
+                    sql = `INSERT INTO LESSONS(dz,date) VALUES (?,?)`;
+                }
+                db.run(sql, dz, date, function (err) {
+                    if (err) {
+                        console.log(err.message);
+                    }
+                });
+
+            });
+            context.send("Дз установлено");
             await context.scene.leave();
         }
     }
@@ -380,6 +453,10 @@ vk.updates.hear(/^\/upr/i, async (context) => {
     } else {
         await context.send("Тоби суда нельзя");
     }
+
+});
+vk.updates.hear(/^\/dz/i, async (context) => {
+        await context.scene.enter('dz');
 
 });
 vk.updates.hear("/ex", async (context) => {
@@ -495,7 +572,7 @@ function getRasp(date) {
                 return
             }
 
-            db.all('SELECT l1,l2,l3,l4,l5,l6, date FROM LESSONS WHERE DATE=?', date, function (err, rows) {
+            db.all('SELECT l1,l2,l3,l4,l5,l6,dz, date FROM LESSONS WHERE DATE=?', date, function (err, rows) {
                 if (err) {
                     console.log(err.message);
                     reject(err.message)
@@ -504,12 +581,14 @@ function getRasp(date) {
                 let temp = '';
                 if (rows.length > 0) {
                     for (let i = 1; i <= 6; i++) {
-                        if (rows[0]["l" + i] && rows[0]["l" + i] != "Null")
+                        if (rows[0]["l" + i])
                             temp += (i + ":" + rows[0]["l" + i] + "\n");
                     }
-                }
-
-                if (temp == "") {
+                    if (rows[0]["dz"]){
+                        temp+=`\n\nДз на этот день:\n
+                                ${rows[0]["dz"]}`
+                    }
+                }else{
                     resolve("На этот день еще нет рассписания");
                 }
 

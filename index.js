@@ -1,5 +1,4 @@
-//"06f5e9828503a3d5b72a08a3d556d799eafebd8c505c08fe048d366a582aef205e89ccc9159e0fe58a91d"
-//id 185873386
+
 const fs = require("fs");
 const {VK} = require('vk-io');
 const TOKEN = JSON.parse(fs.readFileSync('data.json', 'utf-8')).token;
@@ -10,11 +9,6 @@ const {api} = vk;
 let rasp = "https://sun9-3.userapi.com/c846122/v846122093/d6776/NqM_20zkAbM.jpg";
 const sqlite3 = require('sqlite3').verbose();
 let db = new sqlite3.Database('schedule.db');
-
-// var TelegramBot = require('node-telegram-bot-api'); // Устанавливаем токен, который выдавал нам бот
-// var token = '917044014:AAEWZIEZOgjGmYnXjscYRMYFda259a88Tx8'; // Включить опрос сервера. Бот должен обращаться к серверу Telegram, чтобы получать актуальную информацию 
-// var bot = new TelegramBot(token, { polling: true });
-
 
 const {SessionManager} = require('@vk-io/session');
 const {SceneManager, StepScene} = require('@vk-io/scenes');
@@ -213,7 +207,6 @@ vk.updates.hear(/^\/imp/i, async (context) => {
 });
 vk.updates.hear(/^\/simp/i, async (context) => {
     await context.scene.enter('OVS');
-
 });
 
 vk.updates.hear(/^\/kek/i, async (context) => {

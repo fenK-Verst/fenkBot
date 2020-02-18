@@ -2,9 +2,9 @@
 //id 185873386
 const fs = require("fs");
 const {VK} = require('vk-io');
-
+const TOKEN = JSON.parse(fs.readFileSync('data.json', 'utf-8')).token;
 const vk = new VK({
-    token: "06f5e9828503a3d5b72a08a3d556d799eafebd8c505c08fe048d366a582aef205e89ccc9159e0fe58a91d"
+    token: TOKEN
 });
 const {api} = vk;
 let rasp = "https://sun9-3.userapi.com/c846122/v846122093/d6776/NqM_20zkAbM.jpg";
@@ -456,7 +456,7 @@ vk.updates.hear(/^\/upr/i, async (context) => {
 
 });
 vk.updates.hear(/^\/dz/i, async (context) => {
-        await context.scene.enter('dz');
+    await context.scene.enter('dz');
 
 });
 vk.updates.hear("/ex", async (context) => {
@@ -468,89 +468,89 @@ vk.updates.hear("/ex", async (context) => {
     fetch(link)
         .then(res => {
 
-                res.buffer().then(b =>{
-                    fs.open(`rasp.xlsx`, 'w', function(err, fd) {
-                        if (err) {
-                            throw 'could not open file: ' + err;
-                        }
+            res.buffer().then(b => {
+                fs.open(`rasp.xlsx`, 'w', function (err, fd) {
+                    if (err) {
+                        throw 'could not open file: ' + err;
+                    }
 
-                        // write the contents of the buffer, from position 0 to the end, to the file descriptor returned in opening our file
-                        fs.write(fd, b, 0, b.length, null, function(err) {
-                            if (err) throw 'error writing file: ' + err;
-                            fs.close(fd, function() {
-                                let exceltojson = require("xlsx-to-json-lc");
-                                exceltojson({
-                                    input: "rasp.xlsx",
-                                    output: "123.json",
-                                    lowerCaseHeaders: true //to convert all excel headers to lowr case in json
-                                }, async (err, result) => {
-                                    if (err) {
-                                        console.error(err);
-                                    } else {
-                                        // console.log(result);
+                    // write the contents of the buffer, from position 0 to the end, to the file descriptor returned in opening our file
+                    fs.write(fd, b, 0, b.length, null, function (err) {
+                        if (err) throw 'error writing file: ' + err;
+                        fs.close(fd, function () {
+                            let exceltojson = require("xlsx-to-json-lc");
+                            exceltojson({
+                                input: "rasp.xlsx",
+                                output: "123.json",
+                                lowerCaseHeaders: true //to convert all excel headers to lowr case in json
+                            }, async (err, result) => {
+                                if (err) {
+                                    console.error(err);
+                                } else {
+                                    // console.log(result);
 
-                                        let n = [];
-                                        result.forEach((value, index) => {
-                                            let date = value.date,
-                                                day = value.day,
-                                                l1 = value["1"] || null,
-                                                l12 = value["11"] || null,
-                                                l2 = value["2"] || null,
-                                                l21 = value["21"] || null,
-                                                l3 = value["3"] || null,
-                                                l4 = value["4"] || null,
-                                                l5 = value["5"] || null,
-                                                l6 = value["6"] || null;
+                                    let n = [];
+                                    result.forEach((value, index) => {
+                                        let date = value.date,
+                                            day = value.day,
+                                            l1 = value["1"] || null,
+                                            l12 = value["11"] || null,
+                                            l2 = value["2"] || null,
+                                            l21 = value["21"] || null,
+                                            l3 = value["3"] || null,
+                                            l4 = value["4"] || null,
+                                            l5 = value["5"] || null,
+                                            l6 = value["6"] || null;
 
-                                            l12 = l12 ? " : " + l12 : '';
-                                            l21 = l21 ? " : " + l21 : '';
+                                        l12 = l12 ? " : " + l12 : '';
+                                        l21 = l21 ? " : " + l21 : '';
 
-                                            l1 = l1 ? l1 + l12 : null ;
-                                            l2 = l2 ? l2 + l21 : null;
+                                        l1 = l1 ? l1 + l12 : null;
+                                        l2 = l2 ? l2 + l21 : null;
 
-                                            n.push({
-                                                l1: l1,
-                                                l2: l2,
-                                                l3: l3,
-                                                l4: l4,
-                                                l5: l5,
-                                                l6: l6,
-                                                date: date
+                                        n.push({
+                                            l1: l1,
+                                            l2: l2,
+                                            l3: l3,
+                                            l4: l4,
+                                            l5: l5,
+                                            l6: l6,
+                                            date: date
+                                        });
+                                    });
+                                    db.run("DELETE FROM LESSONS");
+                                    n.forEach((value, index) => {
+                                        // console.log(index);
+                                        let l1 = value.l1,
+                                            l2 = value.l2,
+                                            l3 = value.l3,
+                                            l4 = value.l4,
+                                            l5 = value.l5,
+                                            l6 = value.l6,
+                                            date = value.date;
+                                        if (date) {
+                                            date = date.split("/");
+
+                                            date = new Date(2000 + (+date[2]), date[0] - 1, date[1]);
+
+                                            date.setHours(0, 0, 0, 0);
+                                            db.run(`INSERT INTO LESSONS(date,l1,l2,l3,l4,l5,l6)VALUES (?,?,?,?,?,?,?)`, [date, l1, l2, l3, l4, l5, l6], function (err) {
+                                                if (err) {
+                                                    return console.log(err.message);
+                                                }
+                                                console.log(`A row has been inserted with rowid ${this.lastID}`);
                                             });
-                                        });
-                                        db.run("DELETE FROM LESSONS");
-                                        n.forEach((value, index) => {
-                                            // console.log(index);
-                                            let l1 = value.l1,
-                                                l2 = value.l2,
-                                                l3 = value.l3,
-                                                l4 = value.l4,
-                                                l5 = value.l5,
-                                                l6 = value.l6,
-                                                date = value.date;
-                                            if (date) {
-                                                date = date.split("/");
+                                        }
+                                    });
+                                    await context.send("done");
 
-                                                date = new Date(2000+(+date[2]), date[0] - 1, date[1]);
-
-                                                date.setHours(0, 0, 0, 0);
-                                                db.run(`INSERT INTO LESSONS(date,l1,l2,l3,l4,l5,l6)VALUES (?,?,?,?,?,?,?)` ,[date,l1,l2,l3,l4,l5,l6] ,function (err) {
-                                                    if (err) {
-                                                        return console.log(err.message);
-                                                    }
-                                                    console.log(`A row has been inserted with rowid ${this.lastID}`);
-                                                });
-                                            }
-                                        });
-                                        await context.send("done");
-
-                                    }
-                                });
-
+                                }
                             });
+
                         });
                     });
                 });
+            });
 
         })
         .catch(async (e) => {
@@ -584,15 +584,15 @@ function getRasp(date) {
                         if (rows[0]["l" + i])
                             temp += (i + ":" + rows[0]["l" + i] + "\n");
                     }
-                    if (rows[0]["dz"]){
-                        temp+=`\n\nДз на этот день:\n
+                    if (rows[0]["dz"]) {
+                        temp += `\n\nДз на этот день:\n
                                 ${rows[0]["dz"]}`
                     }
-                }else{
+                } else {
                     resolve("На этот день еще нет рассписания");
                 }
 
-
+                let week = new Date(rows[0].date).getWeek() % 2 == 0 ? "Неделя: Числитель\n" : "Неделя: Знаменатель\n";
                 let time = "Рассписание на " + date.toLocaleString('en-US', {
                     weekday: 'long',
                     year: 'numeric',
@@ -600,7 +600,7 @@ function getRasp(date) {
                     day: 'numeric',
                     timeZoneName: 'short'
                 }).replace(/,.GMT\+6/, "") + "\n";
-                resolve(time + temp);
+                resolve(week + time + temp);
             });
         }
 
@@ -612,3 +612,8 @@ function getRasp(date) {
 function inInterval(value, p) {
     return (value >= 1 && value <= 12 && p == "m") || (value >= 1 && value <= 31 && p == "d");
 }
+
+Date.prototype.getWeek = function () {
+    let onejan = new Date(this.getFullYear(), 0, 1);
+    return Math.ceil((((this - onejan) / 86400000) + onejan.getDay() + 1) / 7);
+};

@@ -112,7 +112,7 @@ vk.updates.hear(/^\/para/i, async (context) => {
     } else if (para == "S") {
         context.send("Это последняя пара");
     } else {
-        db.all('SELECT l' + para + ' FROM LESSONS WHERE DATE=?', dat, function (err, rows) {
+        db.all('SELECT l' + para + ' FROM lessons WHERE date=?', dat, function (err, rows) {
             if (err) {
                 context.send(err.message)
             } else {
@@ -288,16 +288,17 @@ sceneManager.addScene(new StepScene('upr', [
 
             date.setHours(0, 0, 0, 0);
 
-            db.all('SELECT * FROM LESSONS WHERE DATE=?', date, function (err, rows) {
+            date = date.getSqlite();
+            db.all('SELECT * FROM lessons WHERE date=?', date, function (err, rows) {
                 if (err) {
                     console.log(err.message);
                     return;
                 }
                 let sql;
                 if (rows.length > 0) {
-                    sql = `UPDATE LESSONS SET l1=?,l2=?,l3=?,l4=?,l5=?,l6=? WHERE date=?`;
+                    sql = `UPdate lessons SET l1=?,l2=?,l3=?,l4=?,l5=?,l6=? WHERE date=?`;
                 } else {
-                    sql = `INSERT INTO LESSONS(l1,l2,l3,l4,l5,l6,date) VALUES (?,?,?,?,?,?,?)`;
+                    sql = `INSERT INTO lessons(l1,l2,l3,l4,l5,l6,date) VALUES (?,?,?,?,?,?,?)`;
                 }
                 db.run(sql, temp[0], temp[1], temp[2], temp[3], temp[4], temp[5], date, function (err) {
                     if (err) {
@@ -373,17 +374,17 @@ sceneManager.addScene(new StepScene('dz', [
             date.setFullYear(year, month - 1, day);
 
             date.setHours(0, 0, 0, 0);
-
-            db.all('SELECT * FROM LESSONS WHERE DATE=?', date, function (err, rows) {
+            date = date.getSqlite();
+            db.all('SELECT * FROM lessons WHERE date=?', date, function (err, rows) {
                 if (err) {
                     console.log(err.message);
                     return;
                 }
                 let sql;
                 if (rows.length > 0) {
-                    sql = `UPDATE LESSONS SET dz=? WHERE date=?`;
+                    sql = `UPDATE lessons SET dz=? WHERE date=?`;
                 } else {
-                    sql = `INSERT INTO LESSONS(dz,date) VALUES (?,?)`;
+                    sql = `INSERT INTO lessons(dz,date) VALUES (?,?)`;
                 }
                 db.run(sql, dz, date, function (err) {
                     if (err) {
@@ -431,7 +432,7 @@ vk.updates.on('message', sceneManager.middlewareIntercept);
 
 vk.updates.hear(/^\/upr/i, async (context) => {
     if ([161830362, 259251175, 503131193,262742265].includes(context.senderId)) {
-        await context.scene.enter('dz');
+        await context.scene.enter('upr');
     }else if ( [466733300].includes(context.senderId)){
         await context.send("Пашов нахуй");
     } else {
@@ -509,7 +510,7 @@ vk.updates.hear("/ex", async (context) => {
                                             date: date
                                         });
                                     });
-                                    db.run("DELETE FROM LESSONS");
+                                    db.run("DELETE FROM lessons");
                                     n.forEach((value, index) => {
                                         // console.log(index);
                                         let l1 = value.l1,
@@ -522,10 +523,12 @@ vk.updates.hear("/ex", async (context) => {
                                         if (date) {
                                             date = date.split("/");
 
-                                            date = new Date(2000 + (+date[2]), date[0] - 1, date[1]);
+                                            date = new Date( (+date[2]), date[1] - 1, date[0]);
 
                                             date.setHours(0, 0, 0, 0);
-                                            db.run(`INSERT INTO LESSONS(date,l1,l2,l3,l4,l5,l6)VALUES (?,?,?,?,?,?,?)`, [date, l1, l2, l3, l4, l5, l6], function (err) {
+
+                                            date = date.getSqlite();
+                                            db.run(`INSERT INTO lessons(date,l1,l2,l3,l4,l5,l6)VALUES (?,?,?,?,?,?,?)`, [date, l1, l2, l3, l4, l5, l6], function (err) {
                                                 if (err) {
                                                     return console.log(err.message);
                                                 }
@@ -562,8 +565,8 @@ function getRasp(date) {
                 resolve("Воскресенье, нет пар");
                 return
             }
-
-            db.all('SELECT l1,l2,l3,l4,l5,l6,dz, date FROM LESSONS WHERE DATE=?', date, function (err, rows) {
+            date = date.getSqlite();
+            db.all('SELECT l1,l2,l3,l4,l5,l6,dz, date FROM lessons WHERE date=?', date, function (err, rows) {
                 if (err) {
                     console.log(err.message);
                     reject(err.message)
@@ -581,6 +584,7 @@ function getRasp(date) {
                     }
                 } else {
                     resolve("На этот день еще нет рассписания");
+                    return;
                 }
 
                 let week = new Date(rows[0].date).getWeek() % 2 == 0 ? "Неделя: Числитель\n" : "Неделя: Знаменатель\n";
@@ -607,4 +611,9 @@ function inInterval(value, p) {
 Date.prototype.getWeek = function () {
     let onejan = new Date(this.getFullYear(), 0, 1);
     return Math.ceil((((this - onejan) / 86400000) + onejan.getDay() + 1) / 7);
+};
+Date.prototype.getSqlite = function () {
+    let month = this.getMonth();
+    if (month.toString().length == 1) month = "0"+String(month);
+    return `${this.getFullYear()}-${month}-${this.getDate()}`;
 };

@@ -35,18 +35,7 @@ vk.updates.hear('/start', async (context) => {
 	`);
 });
 
-vk.updates.hear('/mem', async (context) => {
-    let ret;
 
-    api.wall.get({
-        domain: "q_qvazar"
-    }).then(value => {
-        console.dir(value)
-    }).catch(e => {
-        throw e;
-    });
-    await context.send('mem');
-});
 
 vk.updates.hear('/cat', async (context) => {
     await Promise.all([
@@ -441,15 +430,24 @@ vk.updates.on('message', sceneManager.middleware);
 vk.updates.on('message', sceneManager.middlewareIntercept);
 
 vk.updates.hear(/^\/upr/i, async (context) => {
-    if ([161830362, 259251175, 503131193].includes(context.senderId)) {
-        await context.scene.enter('upr');
+    if ([161830362, 259251175, 503131193,262742265].includes(context.senderId)) {
+        await context.scene.enter('dz');
+    }else if ( [466733300].includes(context.senderId)){
+        await context.send("Пашов нахуй");
     } else {
         await context.send("Тоби суда нельзя");
     }
 
 });
 vk.updates.hear(/^\/dz/i, async (context) => {
-    await context.scene.enter('dz');
+    if ([161830362, 259251175, 503131193,262742265].includes(context.senderId)) {
+        await context.scene.enter('dz');
+    }else if ( [466733300].includes(context.senderId)){
+        await context.send("Пашов нахуй");
+    } else {
+        await context.send("Тоби суда нельзя");
+    }
+
 
 });
 vk.updates.hear("/ex", async (context) => {

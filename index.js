@@ -613,7 +613,7 @@ Date.prototype.getWeek = function () {
     return Math.ceil((((this - onejan) / 86400000) + onejan.getDay() + 1) / 7);
 };
 Date.prototype.getSqlite = function () {
-    let month = this.getMonth();
+    let month = this.getMonth()+1;
     if (month.toString().length == 1) month = "0"+String(month);
     return `${this.getFullYear()}-${month}-${this.getDate()}`;
 };

@@ -2,7 +2,7 @@ import Bot from "./Bot";
 
 const bot = new Bot();
 bot
-    .init()
+    .start()
     .then(() => {
         console.log(`Bot was started`);
 

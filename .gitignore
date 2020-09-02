@@ -1,5 +1,5 @@
 .idea
 node_modules
 schedule.json
-test.js
+src/test.js
 data.json

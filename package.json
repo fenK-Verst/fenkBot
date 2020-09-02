@@ -2,20 +2,42 @@
   "name": "bot-vk",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "build": "tsc",
+    "dev": "tsc --watch & nodemon dist",
+    "test": "tsc && mocha dist/**/*.spec.js",
+    "lint": "eslint src --ext ts",
+    "tsc": "tsc"
   },
-  "author": "",
+  "author": "fenK",
   "license": "ISC",
   "dependencies": {
-    "@vk-io/scenes": "0.0.0-alpha.3",
-    "@vk-io/session": "0.0.0-alpha.1",
-    "fs": "0.0.1-security",
+    "@vk-io/hear": "^1.0.2",
+    "@vk-io/scenes": "^1.0.0",
+    "@vk-io/session": "^2.0.0",
+    "dotenv": "^8.2.0",
     "node-fetch": "^2.6.0",
+    "rimraf": "^3.0.2",
     "sqlite3": "^4.1.0",
+    "typescript": "^4.0.2",
     "vk-io": "^4.0.0-rc.20",
     "xlsx-to-json-lc": "^0.5.0"
+  },
+  "devDependencies": {
+    "@types/mocha": "2.2.41",
+    "@types/node": "^14.6.2",
+    "@types/sqlite3": "^3.1.6",
+    "eslint": "4.0.0",
+    "eslint-config-airbnb-base": "11.2.0",
+    "eslint-plugin-import": "2.3.0",
+    "eslint-plugin-promise": "3.5.0",
+    "express": "4.15.3",
+    "mocha": "3.4.2",
+    "nodemon": "1.11.0",
+    "supertest": "3.0.0",
+    "tsc": "1.20150623.0",
+    "typescript": "2.3.3",
+    "typescript-eslint-parser": "3.0.0"
   }
 }

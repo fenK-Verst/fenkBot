@@ -23,18 +23,18 @@ Date.prototype.getSqlite = function () {
     return `${this.getFullYear()}-${month}-${this.getDate()}`;
 };
 
-type SchoolDay = {
+export type SchoolDay = {
     date: Date
     lessons: Lessons | string
     homework: string
 }
 
-type Message = {
+export type Message = {
     regexp: RegExp;
     func: (context: MessageContext) => void;
 }
 
-type Lessons = {
+export type Lessons = {
     l1: string
     l2: string
     l3: string
@@ -84,42 +84,10 @@ const Bot = class {
                 if (com[0] != "/upr") {
                     return context.scene.step.next();
                 }
-                switch (com.length) {
-                    case 1:
-                        month = new Date().getMonth() + 1;
-                        day = new Date().getDate();
-                        year = new Date().getFullYear();
-                        break;
-
-                    case 2:
-                        if (com[1].toUpperCase() == "NEXT") {
-                            let dat = new Date();
-                            dat.setDate(dat.getDate() + 1);
-                            month = dat.getMonth() + 1;
-                            day = dat.getDate();
-                            year = dat.getFullYear();
-
-                        } else {
-                            let newDate = com[1].split(".");
-                            day = +newDate[0];
-                            month = +newDate[1] || Number(new Date().getMonth()) + 1;
-                            year = +newDate[2] || new Date().getFullYear();
-                        }
-                        break;
-                    case 3:
-                        day = +com[1];
-                        month = +com[2];
-                        year = new Date().getFullYear();
-                        break;
-                    case 4:
-                        day = +com[1];
-                        month = +com[2];
-                        year = +com[3];
-                        break;
-                }
-                month = Number(month);
-                day = Number(day);
-                year = Number(year);
+                const args = this.ras.parseArguments(com);
+                day = args.day;
+                year = args.year;
+                month = args.month;
                 context.send("day:" + day + "\n" + "month:" + month + "\n" + "year:" + year);
 
                 if (this.inInterval(month, "m") && this.inInterval(day, "d")) {
@@ -186,42 +154,12 @@ const Bot = class {
                 if (com[0] != "/dz") {
                     return context.scene.step.next();
                 }
-                switch (com.length) {
-                    case 1:
-                        month = new Date().getMonth() + 1;
-                        day = new Date().getDate();
-                        year = new Date().getFullYear();
-                        break;
+                const args = this.ras.parseArguments(com);
+                day = args.day;
+                year = args.year;
+                month = args.month;
 
-                    case 2:
-                        if (com[1].toUpperCase() == "NEXT") {
-                            let dat = new Date();
-                            dat.setDate(dat.getDate() + 1);
-                            month = dat.getMonth() + 1;
-                            day = dat.getDate();
-                            year = dat.getFullYear();
 
-                        } else {
-                            let newDate = com[1].split(".");
-                            day = +newDate[0];
-                            month = +newDate[1] || Number(new Date().getMonth()) + 1;
-                            year = +newDate[2] || new Date().getFullYear();
-                        }
-                        break;
-                    case 3:
-                        day = +com[1];
-                        month = +com[2];
-                        year = new Date().getFullYear();
-                        break;
-                    case 4:
-                        day = +com[1];
-                        month = +com[2];
-                        year = +com[3];
-                        break;
-                }
-                month = Number(month);
-                day = Number(day);
-                year = Number(year);
                 context.send("day:" + day + "\n" + "month:" + month + "\n" + "year:" + year);
 
                 if (this.inInterval(month, "m") && this.inInterval(day, "d")) {
@@ -486,195 +424,6 @@ const Bot = class {
 
         },
         scenes: () => {
-            // sceneManager.addScene(new StepScene('upr', [
-            //     (context: any) => {
-            //         let com = context.text.split(" ");
-            //
-            //         if (com[0] == "/upr") {
-            //             switch (com.length) {
-            //                 case 1:
-            //                     month = new Date().getMonth() + 1;
-            //                     day = new Date().getDate();
-            //                     year = new Date().getFullYear();
-            //                     break;
-            //
-            //                 case 2:
-            //                     if (com[1].toUpperCase() == "NEXT") {
-            //                         let dat = new Date();
-            //                         dat.setDate(dat.getDate() + 1);
-            //                         month = dat.getMonth() + 1;
-            //                         day = dat.getDate();
-            //                         year = dat.getFullYear();
-            //
-            //                     } else {
-            //                         let newDate = com[1].split(".");
-            //                         day = +newDate[0];
-            //                         month = +newDate[1] || Number(new Date().getMonth()) + 1;
-            //                         year = +newDate[2] || new Date().getFullYear();
-            //                     }
-            //                     break;
-            //                 case 3:
-            //                     day = +com[1];
-            //                     month = +com[2];
-            //                     year = new Date().getFullYear();
-            //                     break;
-            //                 case 4:
-            //                     day = +com[1];
-            //                     month = +com[2];
-            //                     year = +com[3];
-            //                     break;
-            //             }
-            //             month = Number(month);
-            //             day = Number(day);
-            //             year = Number(year);
-            //             context.send("day:" + day + "\n" + "month:" + month + "\n" + "year:" + year);
-            //
-            //             if (inInterval(month, "m") && inInterval(day, "d")) {
-            //                 return context.send('Введите данные');
-            //             } else {
-            //                 context.scene.leave();
-            //             }
-            //         }
-            //
-            //         return context.scene.step.next();
-            //     },
-            //
-            //     async (context: any) => {
-            //         if (inInterval(month, "m") && inInterval(day, "d")) {
-            //             let temp = context.text.split(" ");
-            //
-            //             temp = temp.map(function (val: string) {
-            //                 if (!val || val.toUpperCase() == 'Щ') {
-            //                     return null
-            //                 } else {
-            //                     return val;
-            //                 }
-            //             });
-            //             for (let i = 0; i < 6; i++) {
-            //                 if (!temp[i]) {
-            //                     temp[i] = null
-            //                 }
-            //             }
-            //
-            //             let date = new Date();
-            //             // @ts-ignore
-            //             date.setFullYear(year, month - 1, day);
-            //
-            //             date.setHours(0, 0, 0, 0);
-            //
-            //             // @ts-ignore
-            //             date = date.getSqlite();
-            //             db.all('SELECT * FROM lessons WHERE date=?', date, function (err: any, rows: any) {
-            //                 if (err) {
-            //                     console.log(err.message);
-            //                     return;
-            //                 }
-            //                 let sql;
-            //                 if (rows.length > 0) {
-            //                     sql = `UPDATE lessons SET l1=?,l2=?,l3=?,l4=?,l5=?,l6=? WHERE date=?`;
-            //                 } else {
-            //                     sql = `INSERT INTO lessons(l1,l2,l3,l4,l5,l6,date) VALUES (?,?,?,?,?,?,?)`;
-            //                 }
-            //                 db.run(sql, temp[0], temp[1], temp[2], temp[3], temp[4], temp[5], date, function (err: any) {
-            //                     if (err) {
-            //                         console.log(err.message);
-            //                     }
-            //                 });
-            //
-            //             });
-            //
-            //             context.send("Рассписание установлено");
-            //             await context.scene.leave();
-            //         }
-            //     }
-            // ]));
-            // sceneManager.addScene(new StepScene('dz', [
-            //     (context: any) => {
-            //         let com = context.text.split(" ");
-            //
-            //         if (com[0] == "/dz") {
-            //             switch (com.length) {
-            //                 case 1:
-            //                     month = new Date().getMonth() + 1;
-            //                     day = new Date().getDate();
-            //                     year = new Date().getFullYear();
-            //                     break;
-            //
-            //                 case 2:
-            //                     if (com[1].toUpperCase() == "NEXT") {
-            //                         let dat = new Date();
-            //                         dat.setDate(dat.getDate() + 1);
-            //                         month = dat.getMonth() + 1;
-            //                         day = dat.getDate();
-            //                         year = dat.getFullYear();
-            //
-            //                     } else {
-            //                         let newDate = com[1].split(".");
-            //                         day = +newDate[0];
-            //                         month = +newDate[1] || Number(new Date().getMonth()) + 1;
-            //                         year = +newDate[2] || new Date().getFullYear();
-            //                     }
-            //                     break;
-            //                 case 3:
-            //                     day = +com[1];
-            //                     month = +com[2];
-            //                     year = new Date().getFullYear();
-            //                     break;
-            //                 case 4:
-            //                     day = +com[1];
-            //                     month = +com[2];
-            //                     year = +com[3];
-            //                     break;
-            //             }
-            //             month = Number(month);
-            //             day = Number(day);
-            //             year = Number(year);
-            //             context.send("day:" + day + "\n" + "month:" + month + "\n" + "year:" + year);
-            //
-            //             if (inInterval(month, "m") && inInterval(day, "d")) {
-            //                 return context.send('Введите данные');
-            //             } else {
-            //                 context.scene.leave();
-            //             }
-            //         }
-            //
-            //         return context.scene.step.next();
-            //     },
-            //
-            //     async (context: any) => {
-            //         if (inInterval(month, "m") && inInterval(day, "d")) {
-            //             let dz = context.text;
-            //
-            //             let date = new Date();
-            //             // @ts-ignore
-            //             date.setFullYear(year, month - 1, day);
-            //
-            //             date.setHours(0, 0, 0, 0);
-            //             // @ts-ignore
-            //             date = date.getSqlite();
-            //             db.all('SELECT * FROM lessons WHERE date=?', date, function (err: any, rows: any) {
-            //                 if (err) {
-            //                     console.log(err.message);
-            //                     return;
-            //                 }
-            //                 let sql;
-            //                 if (rows.length > 0) {
-            //                     sql = `UPDATE lessons SET dz=? WHERE date=?`;
-            //                 } else {
-            //                     sql = `INSERT INTO lessons(dz,date) VALUES (?,?)`;
-            //                 }
-            //                 db.run(sql, dz, date, function (err: any) {
-            //                     if (err) {
-            //                         console.log(err.message);
-            //                     }
-            //                 });
-            //
-            //             });
-            //             context.send("Дз установлено");
-            //             await context.scene.leave();
-            //         }
-            //     }
-            // ]));
             this.sceneManager.addScenes(this.scenes);
         },
         state: () => {
@@ -713,7 +462,6 @@ const Bot = class {
         }
 
         const {db} = this;
-        // @ts-ignore
         return db
             //@ts-ignore
             .all('SELECT * FROM lessons WHERE date=?', [date.getSqlite()])
@@ -736,7 +484,7 @@ const Bot = class {
                 return e.message
             });
     }
-    inInterval = (value: any, p: string): boolean => {
+    inInterval = (value: string | number, p: string): boolean => {
         return (value >= 1 && value <= 12 && p == "m") || (value >= 1 && value <= 31 && p == "d");
     };
     ras = {
@@ -772,8 +520,50 @@ const Bot = class {
             }).replace(/,.GMT\+6/, "") + "\n";
             const time = "Рассписание на " + formattedDate;
             return (week + time + messageText);
+        },
+        parseArguments: (args: string[]) => {
+            let day, month, year;
+            switch (args.length) {
+                case 1:
+                    month = new Date().getMonth() + 1;
+                    day = new Date().getDate();
+                    year = new Date().getFullYear();
+                    break;
+
+                case 2:
+                    if (args[1].toUpperCase() == "NEXT") {
+                        let dat = new Date();
+                        dat.setDate(dat.getDate() + 1);
+                        month = dat.getMonth() + 1;
+                        day = dat.getDate();
+                        year = dat.getFullYear();
+
+                    } else {
+                        let newDate = args[1].split(".");
+                        day = newDate[0];
+                        month = newDate[1] || Number(new Date().getMonth()) + 1;
+                        year = newDate[2] || new Date().getFullYear();
+                    }
+                    break;
+                case 3:
+                    day = args[1];
+                    month = args[2];
+                    year = new Date().getFullYear();
+                    break;
+                case 4:
+                    day = args[1];
+                    month = args[2];
+                    year = args[3];
+                    break;
+            }
+            month = Number(month);
+            day = Number(day);
+            year = Number(year);
+
+            return {day, month, year};
         }
     }
+
 
 }
 export default Bot;

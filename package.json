@@ -13,7 +13,7 @@
     "@vk-io/scenes": "0.0.0-alpha.3",
     "@vk-io/session": "0.0.0-alpha.1",
     "fs": "0.0.1-security",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
     "sqlite3": "^4.1.0",
     "vk-io": "^4.0.0-rc.20",
     "xlsx-to-json-lc": "^0.5.0"

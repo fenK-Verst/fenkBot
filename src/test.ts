@@ -38,9 +38,12 @@ parseXlsx('outer/schedule.xlsx').then((parsed) => {
         for (let i=1;i<d.length-1;i+=2){
                 let str = ``;
                 if (d[i].length){
-                    str+=d[i]+"\n";
+                    str+=d[i];
                 }
-                str+=d[i+1];
+                if (d[i+1]){
+                    str+="\n"+d[i+1];
+                }
+
                 lessons.push(str);
         }
 

@@ -341,7 +341,11 @@ const Bot = class {
                     const row: SchoolDay = rows[0],
                         lessons = row?.lessons;
                     if (lessons) {
-                        const lesson = lessons["l" + para] || null;
+                        let parsed;
+                        if (typeof lessons === "string") {
+                            parsed= JSON.parse(lessons);
+                        }
+                        const lesson = parsed["l" + para] || null;
                         let text = para + ":" + lesson;
                         if (isBreak) text=`Сейчас перемена. Следующая пара ${text}`;
 

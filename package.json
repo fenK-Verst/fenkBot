@@ -18,7 +18,7 @@
     "@vk-io/session": "^2.0.0",
     "dotenv": "^8.2.0",
     "excel": "^1.0.1",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
     "rimraf": "^3.0.2",
     "sqlite3": "^4.1.0",
     "vk-io": "^4.0.0-rc.20",
@@ -36,7 +36,6 @@
     "mocha": "3.4.2",
     "nodemon": "1.11.0",
     "supertest": "3.0.0",
-    "tsc": "1.20150623.0",
     "typescript": "^4.0.2",
     "typescript-eslint-parser": "3.0.0"
   }

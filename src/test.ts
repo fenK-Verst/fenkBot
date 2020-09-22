@@ -38,10 +38,10 @@ parseXlsx('outer/schedule.xlsx').then((parsed) => {
         for (let i=1;i<d.length-1;i+=2){
                 let str = ``;
                 if (d[i].length){
-                    str+=d[i];
+                    str+=d[i].trim();
                 }
                 if (d[i+1]){
-                    str+="\n"+d[i+1];
+                    str+=" / "+d[i+1].trim();
                 }
 
                 lessons.push(str);
@@ -91,7 +91,7 @@ parseXlsx('outer/schedule.xlsx').then((parsed) => {
                console.log(e.message);
            })
            .then(() => {
-               console.log("Рассписание установлено");
+               // console.log("Рассписание установлено");
            })
    })
 }).catch(e => {

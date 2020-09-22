@@ -292,52 +292,22 @@ const Bot = class {
                 hour = dat.getHours();
                 min = dat.getMinutes();
             }
-
-            if (hour >= 0 && hour < 8) {
-                para = 1;
-            } else if (hour >= 8 && hour <= 9) {
-                if (hour == 9 && min >= 40) {
-                    para = 3;
-                } else {
-                    para = 2;
-
-                }
-            } else if (hour >= 10 && hour <= 11) {
-                if ((hour == 11 && min >= 40)) {
-                    para = 4;
-                } else {
-                    para = 3;
-
-                }
-            } else if (hour >= 12 && hour <= 13) {
-                if (hour == 13 && min >= 30) {
-                    para = 5;
-                } else {
-                    para = 4;
-
-                }
-            } else if (hour >= 14 && hour <= 15) {
-                if (hour >= 15 && min >= 10) {
-                    para = 6;
-                } else {
-                    para = 5;
-
-                }
-            } else if (hour == 16) {
-                if (hour >= 16 && min >= 50) {
-                    para = "Last";
-                } else {
-                    para = 6;
-                }
-            } else if (hour >= 17) {
-                if (hour <= 18 && min >= 20) {
-                    para = "Last";
-                } else {
-                    para = "Poz";
-                }
+            const intervals = []
+            intervals["9:00:00"] = "10:30:00";
+            intervals["10:40:00"] = "12:10:00";
+            intervals["12:20:00"] = "13:50:00";
+            intervals["14:00:00"] = "15:30:00";
+            intervals["15:40:00"] = "17:10:00";
+            intervals["17:20:00"] = "18:50:00";
+            for (const i in intervals) {
+                console.log(intervals[i], i);
             }
+            return;
+            const rez = this.checkTime('10:00:00', '10:22:00');
 
             dat.setHours(0, 0, 0, 0);
+            //@ts-ignore
+            dat = dat.getSqlite();
             if (para == "Poz") {
                 await context.send("Поздно для пар уже");
             } else if (para == "Last") {
@@ -562,6 +532,22 @@ const Bot = class {
 
             return {day, month, year};
         }
+    }
+    checkTime = (beg: string, end: string): boolean => {
+        let s = 60,
+            d = ':',
+            t = new Date,
+            b = beg.split(d),
+            e = end.split(d);
+            // @ts-ignore
+        b = b [0] * s * s + b [1] * s + +b [2];
+
+            // @ts-ignore
+        e = e [0] * s * s + e [1] * s + +e [2];
+
+            const z = t.getHours() * s * s + t.getMinutes() * s + t.getSeconds();
+        // @ts-ignore
+        return (z >= b && z <= e);
     }
 
 

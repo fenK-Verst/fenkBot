@@ -299,36 +299,61 @@ const Bot = class {
             intervals["14:00:00"] = "15:30:00";
             intervals["15:40:00"] = "17:10:00";
             intervals["17:20:00"] = "18:50:00";
+            let result: boolean = false,
+                isBreak: boolean = false;
+            para = 0;
             for (const i in intervals) {
-                console.log(intervals[i], i);
-            }
-            return;
-            const rez = this.checkTime('10:00:00', '10:22:00');
+                para++;
+                if (this.checkTime(i, intervals[i])) {
+                    result = true;
+                    break;
+                }
 
+            }
+            if (!result && this.checkTime("9:00:00", "19:50:00")) {
+                isBreak = true;
+                const intervals = [];
+                intervals["10:30:01"] = "10:39:59";
+                intervals["12:10:01"] = "12:19:59";
+                intervals["13:50:01"] = "13:59:59";
+                intervals["15:30:01"] = "15:39:59";
+                intervals["17:10:01"] = "17:19:59";
+                para = 1;
+                for (const i in intervals) {
+                    para++;
+                    if (this.checkTime(i, intervals[i])) {
+                        result = true;
+                        break;
+                    }
+
+                }
+            }
+            if (!(para && result)) {
+                await context.send("Сейчас нет пар");
+                return;
+            }
             dat.setHours(0, 0, 0, 0);
             //@ts-ignore
             dat = dat.getSqlite();
-            if (para == "Poz") {
-                await context.send("Поздно для пар уже");
-            } else if (para == "Last") {
-                await context.send("Это последняя пара");
-            } else {
-                this.db
-                    .all('SELECT lessons FROM lessons WHERE date=?', [dat])
-                    .then(async (rows) => {
-                        const row: SchoolDay = rows[0],
-                            lessons = row?.lessons;
-                        if (lessons) {
-                            const lesson = lessons["l" + para] || null;
-                            await context.send(para + ":" + lesson);
-                        } else {
-                            await context.send("Пара не установлена");
+            this.db
+                .all('SELECT lessons FROM lessons WHERE date=?', [dat])
+                .then(async (rows) => {
+                    const row: SchoolDay = rows[0],
+                        lessons = row?.lessons;
+                    if (lessons) {
+                        const lesson = lessons["l" + para] || null;
+                        let text = para + ":" + lesson;
+                        if (isBreak) text=`Сейчас перемена. Следующая пара ${text}`;
+
+                            return await context.send(text);
                         }
+                        await context.send("Пара не установлена");
+
                     })
                     .catch(e => {
                         context.send(e.message)
                     })
-            }
+
         },
         setLessons: async (context: MessageContext) => {
             if (this.allowedUsers.includes(context.senderId)) {

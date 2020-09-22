@@ -4,3 +4,4 @@ node_modules
 dist
 outer
 schedule.db
+/.env

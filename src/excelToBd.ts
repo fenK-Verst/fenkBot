@@ -1,7 +1,5 @@
 import parseXlsx from 'excel';
-import {SchoolDay ,Lessons} from "../src/Bot";
 import SqDatabase from "./Db";
-const fs = require('fs');
 const db = new SqDatabase();
 // @ts-ignore
 Date.prototype.getWeek = function () {
@@ -33,17 +31,20 @@ parseXlsx('outer/schedule.xlsx').then((parsed) => {
        const lessons = [];
        const d = data[index];
        const date = new Date(Date.parse(d[0]));
-       console.log(date);
+       // console.log(date);
        lessons.push(date);
         for (let i=1;i<d.length-1;i+=2){
                 let str = ``;
                 if (d[i].length){
                     str+=d[i].trim();
                 }
-                if (d[i+1]){
-                    str+=" / "+d[i+1].trim();
+                if (d[i].length && d[i+1]){
+                    str+=" / ";
                 }
-
+                if (d[i+1]){
+                    str+=d[i+1].trim();
+                }
+                str = str.replace(/17вт1/i, '').replace(/МПиЗП/i, 'Моделирование').trim();
                 lessons.push(str);
         }
 
